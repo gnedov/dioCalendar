@@ -40,13 +40,14 @@ public class CalendarService implements ICalendarService{
 
     @Override
     public Event getEventById(UUID eventId) {
-
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Event ev;
+        ev = evStore.findById(eventId);
+        return ev;
     }
 
     @Override
     public Event getEventByTitle(String eventTitle) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null; 
     }
 
     public void printEvent(){

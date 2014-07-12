@@ -16,7 +16,8 @@ public class EventStore{
     public HashMap getAllEvents() {
         return allEvents;
     }
-    public Event find(UUID id){
+    public Event findById(UUID id){
         return (Event) allEvents.get(id);
     }
+
 }

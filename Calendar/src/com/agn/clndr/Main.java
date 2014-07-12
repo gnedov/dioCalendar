@@ -37,5 +37,11 @@ public class Main {
 
         for (String name : reservedCalendarNames)
             service.createEvent(id, name, name, attenders, timeStart, timeEnd);
+
+        // [Andr] test find by Id functionality
+        id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
+        service.createEvent(id, title, description, attenders, timeStart, timeEnd);
+        Event myEvent;
+        myEvent = service.getEventById(id);
     }
 }
