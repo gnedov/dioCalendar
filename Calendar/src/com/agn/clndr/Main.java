@@ -42,6 +42,7 @@ public class Main {
         id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
         service.createEvent(id, title, description, attenders, timeStart, timeEnd);
         Event myEvent;
-        myEvent = service.getEventById(id);
+        service.printEvent( service.getEventById(id));
+
     }
 }

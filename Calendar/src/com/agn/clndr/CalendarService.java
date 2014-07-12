@@ -4,7 +4,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
-public class CalendarService implements ICalendarService{
+public class CalendarService implements ICalendarService {
     private EventStore evStore;
 
     public CalendarService(EventStore evStore) {
@@ -15,7 +15,7 @@ public class CalendarService implements ICalendarService{
     public void createEvent(UUID id, String title, String description, List<String> attenders,
                             GregorianCalendar timeStart, GregorianCalendar timeEnd) {
 
-        id = id!=null ? id : UUID.randomUUID();
+        id = id != null ? id : UUID.randomUUID();
 
         Event newEvent = new Event.EvntBuilder()
                 .id(id)
@@ -47,11 +47,11 @@ public class CalendarService implements ICalendarService{
 
     @Override
     public Event getEventByTitle(String eventTitle) {
-        return null; 
+        return null;
     }
 
-    public void printEvent(){
-      // ?   evStore.find()
-        System.out.print(" TO DO...");
+    public void printEvent(Event ev) {
+        System.out.print(ev.toString());
+        //[Andr] ToDo: optimize GregorianCalendar data for output
     }
 }
