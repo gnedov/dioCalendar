@@ -1,22 +1,36 @@
 package com.agn.clndr;
 
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
-public class EventStore{
-    private HashMap allEvents;
+public class EventStore {
+    private Map allEvents;
+    private Map titleMap;
 
     public EventStore() {
-        this.allEvents = new HashMap(10);
+        this.allEvents = new HashMap<UUID, Event>();
+        this.titleMap = new HashMap<String, ArrayList<UUID>>();
     }
 
-    public void addEvent(UUID id, Event event){
+    public void addEvent(UUID id, Event event) {
+        List<UUID> listId = new ArrayList<UUID>();
+
         allEvents.put(id, event);
+        String evTitle = event.getTitle();
+        if (!titleMap.containsKey(evTitle)) {
+            listId.add(event.getId());
+            titleMap.put(evTitle, listId);
+        } else {
+            listId = (List<UUID>) titleMap.get(evTitle);
+            listId.add(event.getId());
+        }
     }
-    public HashMap getAllEvents() {
+
+    public Map getAllEvents() {
         return allEvents;
     }
-    public Event find(UUID id){
+
+    public Event findById(UUID id) {
         return (Event) allEvents.get(id);
     }
+
 }

@@ -32,10 +32,17 @@ public class Main {
         // extend the application with Spring framework
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
         CalendarService service = (CalendarService) context.getBean("calendarService");
-
-        String[] reservedCalendarNames = {"eventTitle_1", "eventTitle_2"};
-
+  id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00c");  // for test purposes only!
+        String[] reservedCalendarNames = {"eventTitle_1", "eventTitle_2", "eventTitle_1"};
         for (String name : reservedCalendarNames)
             service.createEvent(id, name, name, attenders, timeStart, timeEnd);
+
+        // [Andr] test find by Id functionality.
+        // this block is for test purposes only!
+        id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00c");
+        service.createEvent(id, "eventTitle_1", description, attenders, timeStart, timeEnd);
+        Event myEvent;
+        service.printEvent( service.getEventById(id));
+
     }
 }

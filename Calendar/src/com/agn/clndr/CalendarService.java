@@ -4,7 +4,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
-public class CalendarService implements ICalendarService{
+public class CalendarService implements ICalendarService {
     private EventStore evStore;
 
     public CalendarService(EventStore evStore) {
@@ -15,8 +15,9 @@ public class CalendarService implements ICalendarService{
     public void createEvent(UUID id, String title, String description, List<String> attenders,
                             GregorianCalendar timeStart, GregorianCalendar timeEnd) {
 
-        id = id!=null ? id : UUID.randomUUID();
-
+        id = id != null ? id : UUID.randomUUID();
+        if (checkIdIsExists(id))
+            return;  //Do nothing! the same event is already in store!
         Event newEvent = new Event.EvntBuilder()
                 .id(id)
                 .title(title)
@@ -26,6 +27,15 @@ public class CalendarService implements ICalendarService{
                 .timeEnd(timeEnd)
                 .build();
         evStore.addEvent(newEvent.getId(), newEvent);
+    }
+
+    private boolean checkIdIsExists(UUID id) {
+        if (evStore.findById(id) != null) {
+            System.out.println("The event with UUID:" + id.toString() + " already exists! " +
+                    "You can not add this event again!");
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -40,17 +50,18 @@ public class CalendarService implements ICalendarService{
 
     @Override
     public Event getEventById(UUID eventId) {
-
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Event ev;
+        ev = evStore.findById(eventId);
+        return ev;
     }
 
     @Override
     public Event getEventByTitle(String eventTitle) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
-    public void printEvent(){
-      // ?   evStore.find()
-        System.out.print(" TO DO...");
+    public void printEvent(Event ev) {
+        System.out.print(ev.toString());
+        //[Andr] ToDo: optimize GregorianCalendar data for output
     }
 }
