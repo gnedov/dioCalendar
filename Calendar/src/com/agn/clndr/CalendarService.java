@@ -16,7 +16,8 @@ public class CalendarService implements ICalendarService {
                             GregorianCalendar timeStart, GregorianCalendar timeEnd) {
 
         id = id != null ? id : UUID.randomUUID();
-
+        if (checkIdIsExists(id))
+            return;  //Do nothing! the same event is already in store!
         Event newEvent = new Event.EvntBuilder()
                 .id(id)
                 .title(title)
@@ -26,6 +27,15 @@ public class CalendarService implements ICalendarService {
                 .timeEnd(timeEnd)
                 .build();
         evStore.addEvent(newEvent.getId(), newEvent);
+    }
+
+    private boolean checkIdIsExists(UUID id) {
+        if (evStore.findById(id) != null) {
+            System.out.println("The event with UUID:" + id.toString() + " already exists! " +
+                    "You can not add this event again!");
+            return true;
+        }
+        return false;
     }
 
     @Override
