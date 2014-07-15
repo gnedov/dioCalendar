@@ -1,6 +1,7 @@
 package com.agn.clndr;
 
 import org.hamcrest.Matcher;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,6 +50,11 @@ public class ServiceTest {
                 .timeEnd(this.timeEnd)
                 .build();
     }
+
+    @After
+    public void tearDown() {
+        excpectedEvent = null;
+    }
     //
 
     @Test //[Andr] ? (expected = Exception.class)
@@ -85,29 +91,30 @@ public class ServiceTest {
     }
 
     @Test
-    public  void  testCheckIdIsExists() throws Exception{
+    public void testCheckIdIsExists() throws Exception {
         EventStore evStore = mock(EventStore.class);
         CalendarService service = new CalendarService(evStore);
-        //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> only for testing
+        //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
         service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
 
         verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
     @Test
-    public void testAddEvent_CheckCapturedParameters() throws Exception{
+    public void testAddEvent_CheckCapturedParameters() throws Exception {
         EventStore evStore = mock(EventStore.class);
         CalendarService service = new CalendarService(evStore);
 
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
 
-        ArgumentCaptor<UUID> argUUID  = ArgumentCaptor.forClass(UUID.class);
+        ArgumentCaptor<UUID> argUUID = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
 
         verify(evStore).addEvent(argUUID.capture(), argEvent.capture());
 
         assertEquals("38400000-8cf0-11bd-b23e-10b96e4ef00d", argUUID.getValue().toString());
         assertEquals(excpectedEvent, argEvent.getValue());
+
     }
 
 }

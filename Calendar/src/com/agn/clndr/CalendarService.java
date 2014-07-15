@@ -29,7 +29,7 @@ public class CalendarService implements ICalendarService {
         evStore.addEvent(newEvent.getId(), newEvent);
     }
 
-    //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> only for testing
+    //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
     boolean checkIdIsExists(UUID id) {
         if (evStore.findById(id) != null) {
             System.out.println("The event with UUID:" + id.toString() + " already exists! " +
