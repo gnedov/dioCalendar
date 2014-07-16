@@ -23,7 +23,7 @@ public class Main {
         DateTime timeEnd = new DateTime(2014, 7, 2, 23, 11, 11);
 
         /* // This commented code works fine for creating event
-        EventStore evStore = new EventStore();
+        EventStoreImpl evStore = new EventStoreImpl();
         CalendarService clndrService = new CalendarService(evStore);
 
         clndrService.createEvent(id, title, description, attenders, timeStart, timeEnd);

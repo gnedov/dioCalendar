@@ -2,14 +2,13 @@ package com.agn.clndr;
 
 import org.joda.time.DateTime;
 
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
-public class CalendarService implements ICalendarService {
-    private EventStore evStore;
+public class CalendarService implements CalendarServiceImpl {
+    private EventStoreImpl evStore;
 
-    public CalendarService(EventStore evStore) {
+    public CalendarService(EventStoreImpl evStore) {
         this.evStore = evStore;
     }
 
