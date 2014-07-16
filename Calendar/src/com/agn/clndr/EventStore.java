@@ -51,6 +51,7 @@ public class EventStore {
         return allEvents.size();
     }
 
+    //Todo Change getAllEvents: it must return Collection<Event>
     public Map getAllEvents() {
         return allEvents;
     }
@@ -59,4 +60,58 @@ public class EventStore {
         return (Event) allEvents.get(id);
     }
 
+    public Collection<Event> findAllByTitle(String title){
+        if (!titleMap.containsKey(title))
+            return new ArrayList<Event>(0);
+        //TODO This code is bad?
+        Collection<UUID> uuids=((MultiValueMap)titleMap).getCollection(title);
+        Collection<Event> events=new ArrayList<Event>(uuids.size());
+        for (UUID id:uuids){
+            events.add((Event)allEvents.get(id));
+        }
+        return events;
+    }
+
+    //TODO Think about getting all Events by time period (findAllByTimePeriod() put into CalendarService)
+    public Collection<Event> findAllByDate(DateTime date){
+        Iterator<Map.Entry<DateTime,UUID>> iterator=((MultiValueMap)timeStartMap).iterator();
+        Collection<Event> events=new ArrayList<Event>();
+        while (iterator.hasNext()){
+            Map.Entry<DateTime,UUID> entry=iterator.next();
+            if ((entry.getKey()).getYear()==date.getYear() &&
+                (entry.getKey()).getDayOfYear()==date.getDayOfYear()){
+                UUID id=entry.getValue();
+                events.add((Event)allEvents.get(id));
+            }
+        }
+        return events;
+    }
+
+    public Collection <Event> findAllByTimePeriod(DateTime start, DateTime end){
+        Iterator<Map.Entry<DateTime,UUID>> iterator=((MultiValueMap)timeStartMap).iterator();
+        Collection<Event> events=new ArrayList<Event>();
+        while (iterator.hasNext()){
+            Map.Entry<DateTime, UUID> entry=iterator.next();
+            if (entry.getKey().isAfter(start) && entry.getKey().isBefore(end)){
+                UUID id=entry.getValue();
+                events.add((Event)allEvents.get(id));
+            }
+        }
+        return events;
+    }
+
+    public Event findNextByDate(DateTime time){
+        Iterator<Map.Entry<DateTime,UUID>> iterator=((MultiValueMap)timeStartMap).iterator();
+        Map.Entry<DateTime,UUID> good_entry=null;
+        while (iterator.hasNext()){
+            Map.Entry<DateTime,UUID> entry=iterator.next();
+            if (time.isBefore(entry.getKey()))
+                if (good_entry==null || time.isBefore(good_entry.getKey()))
+                    good_entry=entry;
+        }
+        if (good_entry==null){
+            return null;
+        }
+        return (Event) allEvents.get(good_entry.getValue());
+    }
 }
