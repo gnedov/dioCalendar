@@ -1,6 +1,7 @@
 package com.agn.clndr;
 
 import org.hamcrest.Matcher;
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +28,8 @@ public class ServiceTest {
     private String inputName;
     private String description;
     private List<String> attenders;
-    private GregorianCalendar timeStart;
-    private GregorianCalendar timeEnd;
+    private DateTime timeStart;
+    private DateTime timeEnd;
 
     @Before
     public void setUpEvent() {
@@ -38,8 +39,8 @@ public class ServiceTest {
         this.attenders = new ArrayList<String>();
         this.attenders.add("eeeee@mail.ff");
         this.attenders.add("vvvvv@mail.ff");
-        this.timeStart = new GregorianCalendar(2014, 7, 2, 16, 22, 34);
-        this.timeEnd = new GregorianCalendar(2014, 7, 2, 23, 11, 11);
+        this.timeStart = new DateTime(2014, 7, 2, 16, 22, 34);
+        this.timeEnd = new DateTime(2014, 7, 2, 23, 11, 11);
 
         excpectedEvent = new Event.EvntBuilder()
                 .id(this.id)

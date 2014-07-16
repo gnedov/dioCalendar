@@ -5,6 +5,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
+import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -18,8 +19,8 @@ public class Main {
         List<String> attenders = new ArrayList<String>();
         attenders.add("eeeee@mail.ff");
         attenders.add("vvvvv@mail.ff");
-        GregorianCalendar timeStart = new GregorianCalendar(2014, 7, 2, 16, 22, 34);
-        GregorianCalendar timeEnd = new GregorianCalendar(2014, 7, 2, 23, 11, 11);
+        DateTime timeStart = new DateTime(2014, 7, 2, 16, 22, 34);
+        DateTime timeEnd = new DateTime(2014, 7, 2, 23, 11, 11);
 
         /* // This commented code works fine for creating event
         EventStore evStore = new EventStore();
