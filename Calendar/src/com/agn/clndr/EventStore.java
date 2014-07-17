@@ -6,7 +6,7 @@ import java.util.Collection;
 
 interface EventStore{
     void addEvent(Event event);
-    Event removeEvent(Event event);
+    boolean removeEvent(Event event);
     int size();
     Collection<Event> findAllByTitle(String title);
     Collection <Event> findAllByTimePeriod(DateTime start, DateTime end);
