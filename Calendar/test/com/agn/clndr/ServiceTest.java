@@ -17,6 +17,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
+//local code review (vtegza): clean up code @ 20.07.14
 public class ServiceTest {
     private Event excpectedEvent;
     private UUID id;

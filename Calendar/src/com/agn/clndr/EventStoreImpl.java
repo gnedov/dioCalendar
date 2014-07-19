@@ -6,6 +6,7 @@ import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
 public class EventStoreImpl implements EventStore {
+    //local code review (vtegza): add generic types for maps @ 20.07.14
     private Map allEvents;
     private MultiMap titleMap;
     private MultiMap timeStartMap; //if we want to use search by event.timeEnd we need add MultiMap timeEndMap
@@ -64,6 +65,7 @@ public class EventStoreImpl implements EventStore {
         if (!titleMap.containsKey(title))
             return new ArrayList<Event>(0);
         //TODO This code is bad?
+        //local code review (vtegza): yes, there are lots of casts @ 20.07.14
         Collection<UUID> uuids=((MultiValueMap)titleMap).getCollection(title);
         Collection<Event> events=new ArrayList<Event>(uuids.size());
         for (UUID id:uuids){
@@ -76,6 +78,7 @@ public class EventStoreImpl implements EventStore {
     public Collection<Event> findAllByDate(DateTime date){
         Iterator<Map.Entry<DateTime,UUID>> iterator=((MultiValueMap)timeStartMap).iterator();
         Collection<Event> events=new ArrayList<Event>();
+        //local code review (vtegza): lot of complexity, use keySet() @ 20.07.14
         while (iterator.hasNext()){
             Map.Entry<DateTime,UUID> entry=iterator.next();
             if ((entry.getKey()).getYear()==date.getYear() &&
@@ -101,6 +104,7 @@ public class EventStoreImpl implements EventStore {
     }
 
     public Event findNextByDate(DateTime time){
+        //local code review (vtegza): shine of iterators, stick to keySet if you need @ 20.07.14
         Iterator<Map.Entry<DateTime,UUID>> iterator=((MultiValueMap)timeStartMap).iterator();
         Map.Entry<DateTime,UUID> good_entry=null;
         while (iterator.hasNext()){

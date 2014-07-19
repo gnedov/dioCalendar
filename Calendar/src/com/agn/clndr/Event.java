@@ -80,6 +80,7 @@ public class Event {
                 '}';
     }
 
+    //local code review (vtegza): be explicit in names @ 20.07.14
     public static class EvntBuilder {
         private UUID id;
         private String title;

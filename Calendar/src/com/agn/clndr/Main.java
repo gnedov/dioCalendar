@@ -13,9 +13,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class Main {
 
     public static void main(String[] arg) {
+        //local code review (vtegza): clean up code @ 20.07.14
         UUID id = null;
         String title = "cccccc";
         String description = "descr bnbnb kkfkf otoot";
+        //local code review (vtegza): use diamond operator @ 20.07.14
         List<String> attenders = new ArrayList<String>();
         attenders.add("eeeee@mail.ff");
         attenders.add("vvvvv@mail.ff");

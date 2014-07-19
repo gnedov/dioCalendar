@@ -13,6 +13,7 @@ public class CalendarService implements CalendarServiceImpl {
     }
 
     @Override
+    //local code review (vtegza): use CRUD, separated update from create method  @ 20.07.14
     public void createEvent(UUID id, String title, String description, List<String> attenders,
                             DateTime timeStart, DateTime timeEnd) {
 
