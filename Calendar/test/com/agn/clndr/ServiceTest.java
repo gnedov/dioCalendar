@@ -1,34 +1,31 @@
 package com.agn.clndr;
 
 import org.hamcrest.Matcher;
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
-import org.mockito.Matchers;
-import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 
+//local code review (vtegza): clean up code @ 20.07.14
 public class ServiceTest {
     private Event excpectedEvent;
     private UUID id;
     private String inputName;
     private String description;
     private List<String> attenders;
-    private GregorianCalendar timeStart;
-    private GregorianCalendar timeEnd;
+    private DateTime timeStart;
+    private DateTime timeEnd;
 
     @Before
     public void setUpEvent() {
@@ -38,8 +35,8 @@ public class ServiceTest {
         this.attenders = new ArrayList<String>();
         this.attenders.add("eeeee@mail.ff");
         this.attenders.add("vvvvv@mail.ff");
-        this.timeStart = new GregorianCalendar(2014, 7, 2, 16, 22, 34);
-        this.timeEnd = new GregorianCalendar(2014, 7, 2, 23, 11, 11);
+        this.timeStart = new DateTime(2014, 7, 2, 16, 22, 34);
+        this.timeEnd = new DateTime(2014, 7, 2, 23, 11, 11);
 
         excpectedEvent = new Event.EvntBuilder()
                 .id(this.id)
@@ -59,7 +56,7 @@ public class ServiceTest {
 
     @Test //[Andr] ? (expected = Exception.class)
     public void testAddEvent() throws Exception {
-        EventStore evStore = mock(EventStore.class);
+        EventStoreImpl evStore = mock(EventStoreImpl.class);
         CalendarService service = new CalendarService(evStore);
         //[Andr] doThrow(new Exception("stubbed void function")).when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
         //[Andr] doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
@@ -92,7 +89,7 @@ public class ServiceTest {
 
     @Test
     public void testCheckIdIsExists() throws Exception {
-        EventStore evStore = mock(EventStore.class);
+        EventStoreImpl evStore = mock(EventStoreImpl.class);
         CalendarService service = new CalendarService(evStore);
         //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
         service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
@@ -102,7 +99,7 @@ public class ServiceTest {
 
     @Test
     public void testAddEvent_CheckCapturedParameters() throws Exception {
-        EventStore evStore = mock(EventStore.class);
+        EventStoreImpl evStore = mock(EventStoreImpl.class);
         CalendarService service = new CalendarService(evStore);
 
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);

@@ -1,19 +1,21 @@
 package com.agn.clndr;
 
-import java.util.GregorianCalendar;
+import org.joda.time.DateTime;
+
 import java.util.List;
 import java.util.UUID;
 
-public class CalendarService implements ICalendarService {
-    private EventStore evStore;
+public class CalendarService implements CalendarServiceImpl {
+    private EventStoreImpl evStore;
 
-    public CalendarService(EventStore evStore) {
+    public CalendarService(EventStoreImpl evStore) {
         this.evStore = evStore;
     }
 
     @Override
+    //local code review (vtegza): use CRUD, separated update from create method  @ 20.07.14
     public void createEvent(UUID id, String title, String description, List<String> attenders,
-                            GregorianCalendar timeStart, GregorianCalendar timeEnd) {
+                            DateTime timeStart, DateTime timeEnd) {
 
         id = id != null ? id : UUID.randomUUID();
         if (checkIdIsExists(id))

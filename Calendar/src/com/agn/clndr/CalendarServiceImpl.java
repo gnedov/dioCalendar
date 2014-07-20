@@ -1,13 +1,15 @@
 package com.agn.clndr;
 
+import org.joda.time.DateTime;
+
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
-public interface ICalendarService {
+public interface CalendarServiceImpl {
 
     void createEvent(UUID id, String title, String description, List<String> attenders,
-                     GregorianCalendar timeStart, GregorianCalendar timeEnd);
+                     DateTime timeStart, DateTime timeEnd);
 
     void deleteEvent(UUID eventId);
 

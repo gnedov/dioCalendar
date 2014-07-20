@@ -1,5 +1,6 @@
 package com.agn.clndr;
 
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,8 +25,8 @@ public class EventTest {
                 .title("eventTitle")
                 .description("eventDescription")
                 .attenders(attenders)
-                .timeStart(new GregorianCalendar(2014, 4, 3, 12, 33, 44))
-                .timeEnd(new GregorianCalendar(2014, 4, 23, 22, 34))
+                .timeStart(new DateTime(2014, 4, 3, 12, 33, 44))
+                .timeEnd(new DateTime(2014, 4, 23, 22, 34))
                 .build();
 
         emptyEvent = new Event.EvntBuilder()

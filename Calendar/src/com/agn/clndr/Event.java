@@ -1,6 +1,7 @@
 package com.agn.clndr;
 
 import java.util.GregorianCalendar;
+import org.joda.time.DateTime;          //library to work with DateTime class
 import java.util.List;
 import java.util.UUID;
 
@@ -10,8 +11,8 @@ public class Event {
     private final String title;
     private final String description;
     private final List<String> attenders;
-    private final GregorianCalendar timeStart;
-    private final GregorianCalendar timeEnd;
+    private final DateTime timeStart;
+    private final DateTime timeEnd;
 
 
     private Event(EvntBuilder eb) {
@@ -39,11 +40,11 @@ public class Event {
         return attenders;
     }
 
-    public GregorianCalendar getTimeStart() {
+    public DateTime getTimeStart() {
         return timeStart;
     }
 
-    public GregorianCalendar getTimeEnd() {
+    public DateTime getTimeEnd() {
         return timeEnd;
     }
 
@@ -79,13 +80,14 @@ public class Event {
                 '}';
     }
 
+    //local code review (vtegza): be explicit in names @ 20.07.14
     public static class EvntBuilder {
         private UUID id;
         private String title;
         private String description;
         private List<String> attenders;
-        private GregorianCalendar timeStart;
-        private GregorianCalendar timeEnd;
+        private DateTime timeStart;
+        private DateTime timeEnd;
 
         public EvntBuilder id(UUID id) {
             this.id = id;
@@ -107,12 +109,12 @@ public class Event {
             return this;
         }
 
-        public EvntBuilder timeStart(GregorianCalendar timeStart) {
+        public EvntBuilder timeStart(DateTime timeStart) {
             this.timeStart = timeStart;
             return this;
         }
 
-        public EvntBuilder timeEnd(GregorianCalendar timeEnd) {
+        public EvntBuilder timeEnd(DateTime timeEnd) {
             this.timeEnd = timeEnd;
             return this;
         }
