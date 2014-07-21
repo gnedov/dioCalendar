@@ -4,7 +4,7 @@ import org.joda.time.DateTime;
 
 import java.util.Collection;
 
-interface EventStore{
+interface EventStorage {
     void addEvent(Event event);
     boolean removeEvent(Event event);
     int size();

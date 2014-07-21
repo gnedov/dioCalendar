@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class CalendarService implements CalendarServiceImpl {
-    private EventStoreImpl evStore;
+    private EventStorageImpl evStore;
 
-    public CalendarService(EventStoreImpl evStore) {
+    public CalendarService(EventStorageImpl evStore) {
         this.evStore = evStore;
     }
 

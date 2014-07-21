@@ -38,7 +38,7 @@ public class ServiceTest {
         this.timeStart = new DateTime(2014, 7, 2, 16, 22, 34);
         this.timeEnd = new DateTime(2014, 7, 2, 23, 11, 11);
 
-        excpectedEvent = new Event.EvntBuilder()
+        excpectedEvent = new Event.EventBuilder()
                 .id(this.id)
                 .title(this.inputName)
                 .description(this.description)
@@ -56,7 +56,7 @@ public class ServiceTest {
 
     @Test //[Andr] ? (expected = Exception.class)
     public void testAddEvent() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
         //[Andr] doThrow(new Exception("stubbed void function")).when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
         //[Andr] doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
@@ -89,7 +89,7 @@ public class ServiceTest {
 
     @Test
     public void testCheckIdIsExists() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
         //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
         service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
@@ -99,7 +99,7 @@ public class ServiceTest {
 
     @Test
     public void testAddEvent_CheckCapturedParameters() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
 
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);

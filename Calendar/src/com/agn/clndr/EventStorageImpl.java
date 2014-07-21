@@ -2,18 +2,17 @@ package com.agn.clndr;
 
 import java.util.*;
 
-import org.apache.commons.collections4.MultiMap;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
-public class EventStoreImpl implements EventStore {
+public class EventStorageImpl implements EventStorage {
     private HashMap<UUID, Event> allEvents;
     private MultiValueMap<String, UUID> titleMap;
     private MultiValueMap<DateTime, UUID> timeStartMap;
     private MultiValueMap<DateTime, UUID> timeEndMap;
     private MultiValueMap<String, UUID> attenderMap;
 
-    public EventStoreImpl() {
+    public EventStorageImpl() {
         this.allEvents = new HashMap<>();
         this.titleMap = new MultiValueMap<>();
         this.timeStartMap = new MultiValueMap<>();
@@ -21,9 +20,14 @@ public class EventStoreImpl implements EventStore {
         this.attenderMap=new MultiValueMap<>();
     }
 
-    //TODO need verify the parameters (class EventStoreVerifier?). Id and Event must be not null
-    public void addEvent(UUID uuid, Event event) {
+    public void addEvent(Event event) {
+        if (event==null)
+            throw new IllegalArgumentException("Event cannot be null");
+        UUID uuid = event.getId();
+        if (uuid == null)
+            uuid = UUID.randomUUID();
         allEvents.put(uuid, event);
+
         titleMap.put(event.getTitle(), uuid);
         timeStartMap.put(event.getTimeStart(), uuid);
         timeEndMap.put(event.getTimeEnd(), uuid);
@@ -31,16 +35,6 @@ public class EventStoreImpl implements EventStore {
         for (String attender:attenders){
             attenderMap.put(attender, uuid);
         }
-    }
-
-    //[Oleg] This own function must be added to EventStorage interface
-    //[Oleg] because, perhaps, in feature, we will need to change the data store, and we will not
-    //[Oleg] need an UUID
-    public void addEvent(Event event) {
-        UUID uuid = event.getId();
-        if (uuid == null)
-            uuid = UUID.randomUUID();
-        this.addEvent(uuid, event);
     }
 
     public boolean removeEvent(UUID uuid) {
@@ -128,7 +122,7 @@ public class EventStoreImpl implements EventStore {
         }
         return eventCollection;
     }
-    
+
     public Collection<Event> findAllByAttender(String attender){
         Iterator<Map.Entry<String, UUID>> iterator = attenderMap.iterator();
         Collection<Event> events=new ArrayList<>();
