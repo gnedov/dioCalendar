@@ -1,22 +1,14 @@
 package com.agn.clndr;
 
-import java.util.HashMap;
-import java.util.UUID;
+import org.joda.time.DateTime;
 
-public class EventStore{
-    private HashMap allEvents;
+import java.util.Collection;
 
-    public EventStore() {
-        this.allEvents = new HashMap(10);
-    }
-
-    public void addEvent(UUID id, Event event){
-        allEvents.put(id, event);
-    }
-    public HashMap getAllEvents() {
-        return allEvents;
-    }
-    public Event find(UUID id){
-        return (Event) allEvents.get(id);
-    }
+interface EventStore{
+    void addEvent(Event event);
+    boolean removeEvent(Event event);
+    int size();
+    Collection<Event> findAllByTitle(String title);
+    Collection <Event> findAllByTimePeriod(DateTime start, DateTime end);
+    Event findNextByDate(DateTime time);
 }
