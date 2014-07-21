@@ -1,7 +1,7 @@
 package com.agn.clndr;
 
-import java.util.GregorianCalendar;
 import org.joda.time.DateTime;          //library to work with DateTime class
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ public class Event {
     private final DateTime timeEnd;
 
 
-    private Event(EvntBuilder eb) {
+    private Event(EventBuilder eb) {
         this.id = eb.id;
         this.title = eb.title;
         this.description = eb.description;
@@ -81,7 +81,7 @@ public class Event {
     }
 
     //local code review (vtegza): be explicit in names @ 20.07.14
-    public static class EvntBuilder {
+    public static class EventBuilder {
         private UUID id;
         private String title;
         private String description;
@@ -89,32 +89,32 @@ public class Event {
         private DateTime timeStart;
         private DateTime timeEnd;
 
-        public EvntBuilder id(UUID id) {
+        public EventBuilder id(UUID id) {
             this.id = id;
             return this;
         }
 
-        public EvntBuilder title(String title) {
+        public EventBuilder title(String title) {
             this.title = title;
             return this;
         }
 
-        public EvntBuilder description(String description) {
+        public EventBuilder description(String description) {
             this.description = description;
             return this;
         }
 
-        public EvntBuilder attenders(List<String> attenders) {
+        public EventBuilder attenders(List<String> attenders) {
             this.attenders = attenders;
             return this;
         }
 
-        public EvntBuilder timeStart(DateTime timeStart) {
+        public EventBuilder timeStart(DateTime timeStart) {
             this.timeStart = timeStart;
             return this;
         }
 
-        public EvntBuilder timeEnd(DateTime timeEnd) {
+        public EventBuilder timeEnd(DateTime timeEnd) {
             this.timeEnd = timeEnd;
             return this;
         }

@@ -20,7 +20,7 @@ public class CalendarService implements CalendarServiceImpl {
         id = id != null ? id : UUID.randomUUID();
         if (checkIdIsExists(id))
             return;  //Do nothing! the same event is already in store!
-        Event newEvent = new Event.EvntBuilder()
+        Event newEvent = new Event.EventBuilder()
                 .id(id)
                 .title(title)
                 .description(description)
@@ -64,7 +64,7 @@ public class CalendarService implements CalendarServiceImpl {
     }
 
     public void printEvent(Event ev) {
-        System.out.print(ev.toString());
-        //[Andr] ToDo: optimize GregorianCalendar data for output
+        if (ev != null)
+            System.out.print(ev.toString());
     }
 }
