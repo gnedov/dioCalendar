@@ -8,7 +8,9 @@ interface EventStore{
     void addEvent(Event event);
     boolean removeEvent(Event event);
     int size();
-    Collection<Event> findAllByTitle(String title);
-    Collection <Event> findAllByTimePeriod(DateTime start, DateTime end);
-    Event findNextByDate(DateTime time);
+    Collection <Event> findAllByTitle(String title);
+    Collection <Event> findAllStartedByTimePeriod(DateTime start, DateTime end );
+    Collection <Event> findAllEndedByTimePeriod(DateTime start, DateTime end);
+    Collection <Event> findNextByDate(DateTime time);
+
 }

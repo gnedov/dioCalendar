@@ -7,27 +7,35 @@ import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
 public class EventStoreImpl implements EventStore {
-    private Map<UUID, Event> allEvents;
-    private MultiMap<String, UUID> titleMap;
-    private MultiMap<String, UUID> timeStartMap; //if we want to use search by event.timeEnd we need add MultiMap timeEndMap
+    private HashMap<UUID, Event> allEvents;
+    private MultiValueMap<String, UUID> titleMap;
+    private MultiValueMap<DateTime, UUID> timeStartMap;
+    private MultiValueMap<DateTime, UUID> timeEndMap;
+    private MultiValueMap<String, UUID> attenderMap;
 
     public EventStoreImpl() {
         this.allEvents = new HashMap<>();
         this.titleMap = new MultiValueMap<>();
         this.timeStartMap = new MultiValueMap<>();
+        this.timeEndMap=new MultiValueMap<>();
+        this.attenderMap=new MultiValueMap<>();
     }
 
     //TODO need verify the parameters (class EventStoreVerifier?). Id and Event must be not null
-    //addEvent()->add()
-    public void addEvent(UUID id, Event event) {
-        allEvents.put(id, event);
-        titleMap.put(event.getTitle(), id);
-        timeStartMap.put(event.getTimeStart().toString(), id);
+    public void addEvent(UUID uuid, Event event) {
+        allEvents.put(uuid, event);
+        titleMap.put(event.getTitle(), uuid);
+        timeStartMap.put(event.getTimeStart(), uuid);
+        timeEndMap.put(event.getTimeEnd(), uuid);
+        List<String> attenders=event.getAttenders();
+        for (String attender:attenders){
+            attenderMap.put(attender, uuid);
+        }
     }
 
-    //This own function must be added to EventStorage interface
-    //because, perhaps, in feature, we will need to change the data store, and we will not
-    //need an UUID
+    //[Oleg] This own function must be added to EventStorage interface
+    //[Oleg] because, perhaps, in feature, we will need to change the data store, and we will not
+    //[Oleg] need an UUID
     public void addEvent(Event event) {
         UUID uuid = event.getId();
         if (uuid == null)
@@ -43,8 +51,12 @@ public class EventStoreImpl implements EventStore {
     public boolean removeEvent(Event event) {
         UUID uuid = event.getId();
         titleMap.removeMapping(event.getTitle(), uuid);
-        timeStartMap.removeMapping(event.getTimeStart().toString(), uuid);
+        timeStartMap.removeMapping(event.getTimeStart(), uuid);
         allEvents.remove(uuid);
+        List<String> attenders=event.getAttenders();
+        for (String attender:attenders){
+            attenderMap.removeMapping(attender,uuid);
+        }
         return true;
     }
 
@@ -52,7 +64,8 @@ public class EventStoreImpl implements EventStore {
         return allEvents.size();
     }
 
-    //Todo Change getAllEvents: it must return Collection<Event>
+    //[Oleg] TODO Change getAllEvents: it must return Collection<Event>
+    //[Oleg] TODO Maybe need return new HashMap(allEvents)
     public Map getAllEvents() {
         return allEvents;
     }
@@ -64,9 +77,7 @@ public class EventStoreImpl implements EventStore {
     public Collection<Event> findAllByTitle(String title) {
         if (!titleMap.containsKey(title))
             return new ArrayList<>(0);
-        //TODO This code is bad?
-        //local code review (vtegza): yes, there are lots of casts @ 20.07.14
-        Collection<UUID> uuids = ((MultiValueMap) titleMap).getCollection(title);
+        Collection<UUID> uuids = titleMap.getCollection(title);
         Collection<Event> events = new ArrayList<>(uuids.size());
         for (UUID id : uuids) {
             events.add(allEvents.get(id));
@@ -74,24 +85,10 @@ public class EventStoreImpl implements EventStore {
         return events;
     }
 
-    //TODO Think about getting all Events by time period (findAllByTimePeriod() put into CalendarService)
-    public Collection<Event> findAllByDate(DateTime date) {
-        Iterator<Map.Entry<DateTime, UUID>> iterator = ((MultiValueMap) timeStartMap).iterator();
-        Collection<Event> events = new ArrayList<Event>();
-        //local code review (vtegza): lot of complexity, use keySet() @ 20.07.14
-        while (iterator.hasNext()) {
-            Map.Entry<DateTime, UUID> entry = iterator.next();
-            if ((entry.getKey()).getYear() == date.getYear() &&
-                    (entry.getKey()).getDayOfYear() == date.getDayOfYear()) {
-                UUID id = entry.getValue();
-                events.add(allEvents.get(id));
-            }
-        }
-        return events;
-    }
-
-    public Collection<Event> findAllByTimePeriod(DateTime start, DateTime end) {
-        Iterator<Map.Entry<DateTime, UUID>> iterator = ((MultiValueMap) timeStartMap).iterator();
+    //[Oleg] TODO\ Need check behavior, when allEvents collection contains a several elements,
+    //[Oleg] TODO/ started at same time.
+    private Collection<Event> findAllByTimePeriod(DateTime start, DateTime end, MultiValueMap map) {
+        Iterator<Map.Entry<DateTime, UUID>> iterator = map.iterator();
         Collection<Event> events = new ArrayList<>();
         while (iterator.hasNext()) {
             Map.Entry<DateTime, UUID> entry = iterator.next();
@@ -103,19 +100,45 @@ public class EventStoreImpl implements EventStore {
         return events;
     }
 
-    public Event findNextByDate(DateTime time) {
-        //local code review (vtegza): shine of iterators, stick to keySet if you need @ 20.07.14
-        Iterator<Map.Entry<DateTime, UUID>> iterator = ((MultiValueMap) timeStartMap).iterator();
-        Map.Entry<DateTime, UUID> good_entry = null;
-        while (iterator.hasNext()) {
-            Map.Entry<DateTime, UUID> entry = iterator.next();
-            if (time.isBefore(entry.getKey()))
-                if (good_entry == null || time.isBefore(good_entry.getKey()))
-                    good_entry = entry;
+    public Collection<Event> findAllStartedByTimePeriod(DateTime start, DateTime end ) {
+        return findAllByTimePeriod(start, end, timeStartMap);
+    }
+
+    public Collection<Event> findAllEndedByTimePeriod(DateTime start, DateTime end) {
+        return findAllByTimePeriod(start, end, timeEndMap);
+    }
+
+    //[Oleg] I return a collection, because a several events can start at same time
+    public Collection<Event> findNextByDate(DateTime time) {
+        Set<DateTime> timeSet=timeStartMap.keySet();
+        DateTime good_key=null;
+        for(DateTime key:timeSet){
+            if (time.isBefore(key)){
+                if (good_key==null||time.isBefore(good_key)){
+                    good_key=key;
+                }
+            }
         }
-        if (good_entry == null) {
-            return null;
+        if (good_key==null)
+            return new ArrayList<Event>(0);
+        Collection<UUID> uuidCollection=timeStartMap.getCollection(good_key);
+        Collection<Event> eventCollection=new ArrayList<Event>(uuidCollection.size());
+        for (UUID uuid:uuidCollection){
+            eventCollection.add(allEvents.get(uuid));
         }
-        return allEvents.get(good_entry.getValue());
+        return eventCollection;
+    }
+    
+    public Collection<Event> findAllByAttender(String attender){
+        Iterator<Map.Entry<String, UUID>> iterator = attenderMap.iterator();
+        Collection<Event> events=new ArrayList<>();
+        while (iterator.hasNext()){
+            Map.Entry<String, UUID> entry=iterator.next();
+            if (entry.getKey().equalsIgnoreCase(attender)){
+                UUID id=entry.getValue();
+                events.add(allEvents.get(id));
+            }
+        }
+        return events;
     }
 }
