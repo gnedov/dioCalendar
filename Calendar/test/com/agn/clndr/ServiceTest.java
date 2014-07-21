@@ -13,13 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static junit.framework.Assert.*;
 import static org.mockito.Mockito.*;
 
-//local code review (vtegza): clean up code @ 20.07.14
 public class ServiceTest {
-    private Event excpectedEvent;
+    private Event expectedEvent;
     private UUID id;
     private String inputName;
     private String description;
@@ -32,13 +30,13 @@ public class ServiceTest {
         this.id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
         this.inputName = "dddd";
         this.description = "descr bnbnb kkfkf otoot";
-        this.attenders = new ArrayList<String>();
+        this.attenders = new ArrayList<>();
         this.attenders.add("eeeee@mail.ff");
         this.attenders.add("vvvvv@mail.ff");
         this.timeStart = new DateTime(2014, 7, 2, 16, 22, 34);
         this.timeEnd = new DateTime(2014, 7, 2, 23, 11, 11);
 
-        excpectedEvent = new Event.EvntBuilder()
+        expectedEvent = new Event.EventBuilder()
                 .id(this.id)
                 .title(this.inputName)
                 .description(this.description)
@@ -50,23 +48,30 @@ public class ServiceTest {
 
     @After
     public void tearDown() {
-        excpectedEvent = null;
+        expectedEvent = null;
     }
-    //
 
-    @Test //[Andr] ? (expected = Exception.class)
+    @Test
     public void testAddEvent() throws Exception {
         EventStoreImpl evStore = mock(EventStoreImpl.class);
         CalendarService service = new CalendarService(evStore);
-        //[Andr] doThrow(new Exception("stubbed void function")).when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
-        //[Andr] doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
+        doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
 
         InOrder inOrder = inOrder(evStore);
 
         inOrder.verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
-        inOrder.verify(evStore).addEvent(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"), excpectedEvent);
+        inOrder.verify(evStore).addEvent(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"), expectedEvent);
         verifyNoMoreInteractions(evStore);
+    }
+
+    @Test
+    public void testAddEvent_InterceptedCreation() throws Exception {
+        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        CalendarService service = new CalendarService(evStore);
+        doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
+        service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
+        assertTrue(!service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d")));
     }
 
     private Matcher<UUID> isUUID() {
@@ -93,7 +98,6 @@ public class ServiceTest {
         CalendarService service = new CalendarService(evStore);
         //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
         service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
-
         verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
@@ -110,8 +114,24 @@ public class ServiceTest {
         verify(evStore).addEvent(argUUID.capture(), argEvent.capture());
 
         assertEquals("38400000-8cf0-11bd-b23e-10b96e4ef00d", argUUID.getValue().toString());
-        assertEquals(excpectedEvent, argEvent.getValue());
-
+        assertEquals(expectedEvent, argEvent.getValue());
+    }
+    
+    @Test
+    public void testAddEvent_CallCheckIdIsExist() throws Exception{
+        EventStoreImpl evStore = new EventStoreImpl();
+        CalendarService service = new CalendarService(evStore);
+        CalendarService spyService =spy(service);
+        spyService.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
+        verify(spyService).checkIdIsExists(id);
+    }
+    
+    @Test
+    public void testGetEventById() throws Exception{
+        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        CalendarService service = new CalendarService(evStore);
+        service.getEventById(id);
+        verify(evStore).findById(id);
     }
 
 }
