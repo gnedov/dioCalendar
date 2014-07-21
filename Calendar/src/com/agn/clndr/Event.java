@@ -1,6 +1,5 @@
 package com.agn.clndr;
 
-import java.util.GregorianCalendar;
 import org.joda.time.DateTime;          //library to work with DateTime class
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +14,7 @@ public class Event {
     private final DateTime timeEnd;
 
 
-    private Event(EvntBuilder eb) {
+    private Event(EventBuilder eb) {
         this.id = eb.id;
         this.title = eb.title;
         this.description = eb.description;
@@ -81,7 +80,7 @@ public class Event {
     }
 
     //local code review (vtegza): be explicit in names @ 20.07.14
-    public static class EvntBuilder {
+    public static class EventBuilder {
         private UUID id;
         private String title;
         private String description;
@@ -89,34 +88,46 @@ public class Event {
         private DateTime timeStart;
         private DateTime timeEnd;
 
-        public EvntBuilder id(UUID id) {
-            this.id = id;
-            return this;
+        public EventBuilder id(UUID id) {
+            if (id != null) {
+                this.id = id;
+                return this;
+            } else throw new IllegalArgumentException("id can't be null");
         }
 
-        public EvntBuilder title(String title) {
-            this.title = title;
-            return this;
+        public EventBuilder title(String title) {
+            if (title != null) {
+                this.title = title;
+                return this;
+            } else throw new IllegalArgumentException("title can't be null");
         }
 
-        public EvntBuilder description(String description) {
-            this.description = description;
-            return this;
+        public EventBuilder description(String description) {
+            if (description != null) {
+                this.description = description;
+                return this;
+            } else throw new IllegalArgumentException("description can't be null");
         }
 
-        public EvntBuilder attenders(List<String> attenders) {
-            this.attenders = attenders;
-            return this;
+        public EventBuilder attenders(List<String> attenders) {
+            if (attenders != null) {
+                this.attenders = attenders;
+                return this;
+            } else throw new IllegalArgumentException("attenders can't be null");
         }
 
-        public EvntBuilder timeStart(DateTime timeStart) {
-            this.timeStart = timeStart;
-            return this;
+        public EventBuilder timeStart(DateTime timeStart) {
+            if (timeStart != null) {
+                this.timeStart = timeStart;
+                return this;
+            } else throw new IllegalArgumentException("timeStart can't be null");
         }
 
-        public EvntBuilder timeEnd(DateTime timeEnd) {
-            this.timeEnd = timeEnd;
-            return this;
+        public EventBuilder timeEnd(DateTime timeEnd) {
+            if (timeEnd != null) {
+                this.timeEnd = timeEnd;
+                return this;
+            } else throw new IllegalArgumentException("timeEnd can't be null");
         }
 
         public Event build() {

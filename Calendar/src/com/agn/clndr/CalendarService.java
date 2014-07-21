@@ -20,7 +20,7 @@ public class CalendarService implements CalendarServiceImpl {
         id = id != null ? id : UUID.randomUUID();
         if (checkIdIsExists(id))
             return;  //Do nothing! the same event is already in store!
-        Event newEvent = new Event.EvntBuilder()
+        Event newEvent = new Event.EventBuilder()
                 .id(id)
                 .title(title)
                 .description(description)
@@ -43,7 +43,7 @@ public class CalendarService implements CalendarServiceImpl {
 
     @Override
     public void deleteEvent(UUID eventId) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        evStore.removeEvent(eventId);
     }
 
     @Override
