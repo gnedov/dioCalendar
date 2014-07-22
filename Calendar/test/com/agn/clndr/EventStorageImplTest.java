@@ -54,15 +54,21 @@ public class EventStorageImplTest extends Assert{
                 .timeEnd(new DateTime(2014,8,16,23,05,10))
                 .attenders(attenders)
                 .build();
-        int sizeBeforeAdd=storage.size();
+        int sizeBefore=storage.size();
         storage.addEvent(event);
-        int sizeAfterAdd=storage.size();
-        assertEquals(sizeBeforeAdd+1,sizeAfterAdd);
+        int sizeAfter=storage.size();
+        assertEquals(sizeBefore+1,sizeAfter);
     }
 
 
-    @Test
+    @Test (expected=IllegalArgumentException.class)
     public void addEventIsNullTest(){
+        Event event=null;
+        storage.addEvent(event);
+    }
+
+    @Test
+    public void removeEventGoodTest(){
         LinkedList<String> attenders=new LinkedList<String>();
         attenders.push("attThree@gmail.com");
         attenders.push("attOne@gmail.com");
@@ -70,19 +76,63 @@ public class EventStorageImplTest extends Assert{
                 .id(UUID.randomUUID())
                 .title("Event temp")
                 .description("This is some temporary simple event")
-                .timeStart(new DateTime(2014,8,16,00,00,00))
-                .timeEnd(new DateTime(2014,8,16,23,05,10))
+                .timeStart(new DateTime(2014, 8, 16, 00, 00, 00))
+                .timeEnd(new DateTime(2014, 8, 16, 23, 05, 10))
                 .attenders(attenders)
                 .build();
-        int sizeBeforeAdd=storage.size();
         storage.addEvent(event);
-        int sizeAfterAdd=storage.size();
-        assertEquals(sizeBeforeAdd+1,sizeAfterAdd);
+        int sizeBefore=storage.size();
+        assertEquals(true,storage.removeEvent(event));
+        int sizeAfter=storage.size();
+        assertEquals(sizeBefore-1,sizeAfter);
     }
 
     @Test
-    public void removeEventByUUIDGoodTest(){
-
+    public void removeEventIsAbsentTest(){
+        EventStorageImpl otherStorage=new EventStorageImpl();
+        LinkedList<String> attenders=new LinkedList<String>();
+        attenders.push("attThree@gmail.com");
+        attenders.push("attOne@gmail.com");
+        Event event=new Event.EventBuilder()
+                .id(UUID.randomUUID())
+                .title("Event temp")
+                .description("This is some temporary simple event")
+                .timeStart(new DateTime(2014, 8, 16, 00, 00, 00))
+                .timeEnd(new DateTime(2014, 8, 16, 23, 05, 10))
+                .attenders(attenders)
+                .build();
+        assertEquals(false,otherStorage.removeEvent(event));
     }
+
+    @Test (expected=IllegalArgumentException.class)
+    public void removeEventIsNullTest(){
+        Event event=null;
+        storage.removeEvent(event);
+    }
+
+    @Test
+    public void findByIdTestGood(){
+        LinkedList<String> attenders=new LinkedList<String>();
+        attenders.push("attThree@gmail.com");
+        attenders.push("attOne@gmail.com");
+        UUID uuid=UUID.randomUUID();
+        Event event=new Event.EventBuilder()
+                .id(uuid)
+                .title("Event temp")
+                .description("This is some temporary simple event")
+                .timeStart(new DateTime(2014, 8, 16, 00, 00, 00))
+                .timeEnd(new DateTime(2014, 8, 16, 23, 05, 10))
+                .attenders(attenders)
+                .build();
+        storage.addEvent(event);
+        assertEquals(event,storage.findById(uuid));
+    }
+
+    @Test
+    public void findByIdIfEventIsAbsentTest(){
+        UUID uuid=UUID.randomUUID();
+        assertEquals(null,storage.findById(uuid));
+    }
+
 
 }

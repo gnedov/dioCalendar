@@ -65,7 +65,7 @@ public class ServiceTest {
         InOrder inOrder = inOrder(evStore);
 
         inOrder.verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
-        inOrder.verify(evStore).addEvent(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"), excpectedEvent);
+        inOrder.verify(evStore).addEvent(excpectedEvent);
         verifyNoMoreInteractions(evStore);
     }
 
@@ -107,7 +107,7 @@ public class ServiceTest {
         ArgumentCaptor<UUID> argUUID = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
 
-        verify(evStore).addEvent(argUUID.capture(), argEvent.capture());
+        verify(evStore).addEvent( argEvent.capture());
 
         assertEquals("38400000-8cf0-11bd-b23e-10b96e4ef00d", argUUID.getValue().toString());
         assertEquals(excpectedEvent, argEvent.getValue());

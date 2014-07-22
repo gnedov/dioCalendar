@@ -37,16 +37,15 @@ public class EventStorageImpl implements EventStorage {
         }
     }
 
-    public boolean removeEvent(UUID uuid) {
-        Event event = allEvents.get(uuid);
-        return this.removeEvent(event);
-    }
-
     public boolean removeEvent(Event event) {
+        if (event==null)
+            throw new IllegalArgumentException("Event cannot be null");
         UUID uuid = event.getId();
+        if (allEvents.remove(uuid)==null)
+            return false;
         titleMap.removeMapping(event.getTitle(), uuid);
         timeStartMap.removeMapping(event.getTimeStart(), uuid);
-        allEvents.remove(uuid);
+
         List<String> attenders=event.getAttenders();
         for (String attender:attenders){
             attenderMap.removeMapping(attender,uuid);
