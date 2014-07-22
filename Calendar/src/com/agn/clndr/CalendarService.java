@@ -43,7 +43,7 @@ public class CalendarService implements CalendarServiceImpl {
 
     @Override
     public void deleteEvent(UUID eventId) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        evStore.removeEvent(eventId);
     }
 
     @Override
