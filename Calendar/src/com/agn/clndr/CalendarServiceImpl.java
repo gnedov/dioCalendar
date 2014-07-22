@@ -18,5 +18,7 @@ public interface CalendarServiceImpl {
     Event getEventByTitle(String eventTitle);
     
     List<Event> getEventsOnWholeDay(DateTime timeDay);
+    
+    boolean isPersonBusyOnTime(String attender, DateTime concreteTime);
 
 }

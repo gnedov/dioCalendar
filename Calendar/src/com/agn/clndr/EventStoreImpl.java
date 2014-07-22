@@ -9,7 +9,9 @@ import org.joda.time.DateTime;
 public class EventStoreImpl implements EventStore {
     private Map<UUID, Event> allEvents;
     private MultiMap<String, UUID> titleMap;
-    private MultiMap<String, UUID> timeStartMap; //if we want to use search by event.timeEnd we need add MultiMap timeEndMap
+    private MultiValueMap<DateTime, UUID> timeStartMap;
+    private MultiValueMap<DateTime, UUID> timeEndMap;
+    private MultiValueMap<String, UUID> attenderMap;
 
     public EventStoreImpl() {
         this.allEvents = new HashMap<>();
@@ -22,7 +24,7 @@ public class EventStoreImpl implements EventStore {
     public void addEvent(UUID id, Event event) {
         allEvents.put(id, event);
         titleMap.put(event.getTitle(), id);
-        timeStartMap.put(event.getTimeStart().toString(), id);
+        timeStartMap.put(event.getTimeStart(), id);
     }
 
     //This own function must be added to EventStorage interface
@@ -59,6 +61,34 @@ public class EventStoreImpl implements EventStore {
 
     public Event findById(UUID id) {
         return allEvents.get(id);
+    }
+
+    public List<Event> findEventsByIds(List<UUID> ids) {
+        List<Event> eventList = new ArrayList<>();
+        for (UUID id : ids) {
+            eventList.add(allEvents.get(id));
+        }
+        return eventList;
+    }
+
+    public List<UUID> findEventsIdsStartedBefore(DateTime beforeDate) {
+        List<UUID> idsList = new ArrayList<>();
+        for (DateTime evDate : timeStartMap.keySet()) {
+            if (evDate.isBefore(beforeDate)) {
+                idsList.add((UUID) timeStartMap.get(evDate));
+            }
+        }
+        return idsList;
+    }
+
+    public List<UUID> findEventsIdsEndedAfter(DateTime afterDate) {
+        List<UUID> idsList = new ArrayList<>();
+        for (DateTime evDate : timeStartMap.keySet()) {
+            if (evDate.isAfter(afterDate)) {
+                idsList.add((UUID) timeStartMap.get(evDate));
+            }
+        }
+        return idsList;
     }
 
     public Collection<Event> findAllByTitle(String title) {
@@ -117,5 +147,17 @@ public class EventStoreImpl implements EventStore {
             return null;
         }
         return allEvents.get(good_entry.getValue());
+    }
+
+    public List<UUID> findEventsIdsByAttender(String attender) {
+        Iterator<Map.Entry<String, UUID>> iterator = attenderMap.iterator();
+        List<UUID> eventsIds = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, UUID> entry = iterator.next();
+            if (entry.getKey().equalsIgnoreCase(attender)) {
+                eventsIds.add(entry.getValue());
+            }
+        }
+        return eventsIds;
     }
 }

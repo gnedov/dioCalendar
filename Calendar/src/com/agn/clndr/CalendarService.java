@@ -74,12 +74,32 @@ public class CalendarService implements CalendarServiceImpl {
         List<Event> endedEvents = new ArrayList<>();
         DateTime dayStart = (timeDay.withTimeAtStartOfDay()).withZoneRetainFields(DateTimeZone.UTC);
         DateTime dayEnd = dayStart.plusSeconds(SECONDS_PER_DAY - 1);
-        /* TODO: uncomment after findAllStartedByTimePeriod() and  findAllEndedByTimePeriod() appeared in eventStorage ;)
-                * startedEvents = findAllStartedByTimePeriod(dayStart, dayEnd );
-                * endedEvents = findAllEndedByTimePeriod(dayStart, dayEnd);
+        /*  TODO: uncomment after findAllStartedByTimePeriod() and  findAllEndedByTimePeriod() appeared in eventStorage ;)
+                         startedEvents = evStore.findAllStartedByTimePeriod(dayStart, dayEnd );
+                         endedEvents = evStore.findAllEndedByTimePeriod(dayStart, dayEnd);
         */
         startedEvents.retainAll(endedEvents);
         return startedEvents;
+    }
+
+    @Override
+    public boolean isPersonBusyOnTime(String attender, DateTime concreteTime) {
+        return (getIdsListByPersonByTime(attender, concreteTime).size() > 0);
+    }
+
+    private List<UUID> getIdsListByPersonByTime(String attender, DateTime concreteTime) {
+        List<UUID> idsEventsList;
+        List<UUID> idsStartedBefore;
+        List<UUID> idsEndedAfter;
+
+        idsEventsList = evStore.findEventsIdsByAttender(attender);
+        idsStartedBefore = evStore.findEventsIdsStartedBefore(concreteTime);
+        idsEndedAfter = evStore.findEventsIdsEndedAfter(concreteTime);
+
+        idsEventsList.retainAll(idsStartedBefore); // the first left join
+        idsEventsList.retainAll(idsEndedAfter);    // the second left join
+
+        return idsEventsList;
     }
 
     public void printEvent(Event ev) {
