@@ -90,33 +90,45 @@ public class Event {
         private DateTime timeEnd;
 
         public EventBuilder id(UUID id) {
-            this.id = id;
-            return this;
+            if (id != null) {
+                this.id = id;
+                return this;
+            } else throw new IllegalArgumentException("id can't be null");
         }
 
         public EventBuilder title(String title) {
-            this.title = title;
-            return this;
+            if (title != null) {
+                this.title = title;
+                return this;
+            } else throw new IllegalArgumentException("title can't be null");
         }
 
         public EventBuilder description(String description) {
-            this.description = description;
-            return this;
+            if (description != null) {
+                this.description = description;
+                return this;
+            } else throw new IllegalArgumentException("description can't be null");
         }
 
         public EventBuilder attenders(List<String> attenders) {
-            this.attenders = attenders;
-            return this;
+            if (attenders != null) {
+                this.attenders = attenders;
+                return this;
+            } else throw new IllegalArgumentException("attenders can't be null");
         }
 
         public EventBuilder timeStart(DateTime timeStart) {
-            this.timeStart = timeStart;
-            return this;
+            if (timeStart != null) {
+                this.timeStart = timeStart;
+                return this;
+            } else throw new IllegalArgumentException("timeStart can't be null");
         }
 
         public EventBuilder timeEnd(DateTime timeEnd) {
-            this.timeEnd = timeEnd;
-            return this;
+            if (timeEnd != null) {
+                this.timeEnd = timeEnd;
+                return this;
+            } else throw new IllegalArgumentException("timeEnd can't be null");
         }
 
         public Event build() {
