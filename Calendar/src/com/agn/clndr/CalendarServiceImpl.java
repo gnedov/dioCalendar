@@ -1,8 +1,6 @@
 package com.agn.clndr;
 
 import org.joda.time.DateTime;
-
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,5 +16,7 @@ public interface CalendarServiceImpl {
     Event getEventById(UUID eventId);
 
     Event getEventByTitle(String eventTitle);
+    
+    List<Event> getEventsOnWholeDay(DateTime timeDay);
 
 }

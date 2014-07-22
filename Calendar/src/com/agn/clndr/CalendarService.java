@@ -2,6 +2,11 @@ package com.agn.clndr;
 
 import org.joda.time.DateTime;
 
+import static org.joda.time.DateTimeConstants.*;
+
+import org.joda.time.DateTimeZone;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,8 +68,23 @@ public class CalendarService implements CalendarServiceImpl {
         return null;
     }
 
+    @Override
+    public List<Event> getEventsOnWholeDay(DateTime timeDay) {
+        List<Event> startedEvents = new ArrayList<>();
+        List<Event> endedEvents = new ArrayList<>();
+        DateTime dayStart = (timeDay.withTimeAtStartOfDay()).withZoneRetainFields(DateTimeZone.UTC);
+        DateTime dayEnd = dayStart.plusSeconds(SECONDS_PER_DAY - 1);
+        /* TODO: uncomment after findAllStartedByTimePeriod() and  findAllEndedByTimePeriod() appeared in eventStorage ;)
+                * startedEvents = findAllStartedByTimePeriod(dayStart, dayEnd );
+                * endedEvents = findAllEndedByTimePeriod(dayStart, dayEnd);
+        */
+        startedEvents.retainAll(endedEvents);
+        return startedEvents;
+    }
+
     public void printEvent(Event ev) {
         if (ev != null)
             System.out.print(ev.toString());
     }
+
 }

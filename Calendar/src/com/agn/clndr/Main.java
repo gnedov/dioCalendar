@@ -27,5 +27,8 @@ public class Main {
         id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
         service.createEvent(id, title, description, attenders, timeStart, timeEnd);
         service.printEvent(service.getEventById(id));
+
+        DateTime timeTEst = new DateTime(2014, 7, 23, 16, 22, 34);
+        service.getEventsOnWholeDay(timeTEst);
     }
 }
