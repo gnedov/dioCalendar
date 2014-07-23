@@ -17,6 +17,8 @@ public class EventStoreImpl implements EventStore {
         this.allEvents = new HashMap<>();
         this.titleMap = new MultiValueMap<>();
         this.timeStartMap = new MultiValueMap<>();
+        this.timeEndMap=new MultiValueMap<>();
+        this.attenderMap = new MultiValueMap<>();
     }
 
     //TODO need verify the parameters (class EventStoreVerifier?). Id and Event must be not null
@@ -25,6 +27,11 @@ public class EventStoreImpl implements EventStore {
         allEvents.put(id, event);
         titleMap.put(event.getTitle(), id);
         timeStartMap.put(event.getTimeStart(), id);
+        timeEndMap.put(event.getTimeEnd(), id);
+        List<String> attenders = event.getAttenders();
+        for (String attender : attenders) {
+            attenderMap.put(attender, id);
+        }
     }
 
     //This own function must be added to EventStorage interface
@@ -75,7 +82,7 @@ public class EventStoreImpl implements EventStore {
         List<UUID> idsList = new ArrayList<>();
         for (DateTime evDate : timeStartMap.keySet()) {
             if (evDate.isBefore(beforeDate)) {
-                idsList.add((UUID) timeStartMap.get(evDate));
+                idsList.addAll((List<UUID>) timeStartMap.get(evDate));
             }
         }
         return idsList;
@@ -83,9 +90,19 @@ public class EventStoreImpl implements EventStore {
 
     public List<UUID> findEventsIdsEndedAfter(DateTime afterDate) {
         List<UUID> idsList = new ArrayList<>();
-        for (DateTime evDate : timeStartMap.keySet()) {
+        for (DateTime evDate : timeEndMap.keySet()) {
             if (evDate.isAfter(afterDate)) {
-                idsList.add((UUID) timeStartMap.get(evDate));
+                idsList.addAll((List<UUID>) timeEndMap.get(evDate));
+            }
+        }
+        return idsList;
+    }
+
+    public List<UUID> findEventsIdsStartedOnTimeRange(DateTime timeStart, DateTime timeEnd) {
+        List<UUID> idsList = new ArrayList<>();
+        for (DateTime startedTime : timeStartMap.keySet()) {
+            if (startedTime.isAfter(timeStart) && startedTime.isBefore(timeEnd)) {
+                idsList.addAll((List<UUID>) timeStartMap.get(startedTime));
             }
         }
         return idsList;

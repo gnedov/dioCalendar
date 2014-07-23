@@ -75,6 +75,7 @@ public class CalendarService implements CalendarServiceImpl {
         DateTime dayStart = (timeDay.withTimeAtStartOfDay()).withZoneRetainFields(DateTimeZone.UTC);
         DateTime dayEnd = dayStart.plusSeconds(SECONDS_PER_DAY - 1);
         /*  TODO: uncomment after findAllStartedByTimePeriod() and  findAllEndedByTimePeriod() appeared in eventStorage ;)
+        //[Andr]: uncomment lines below after merge with Oleg's branch will be done
                          startedEvents = evStore.findAllStartedByTimePeriod(dayStart, dayEnd );
                          endedEvents = evStore.findAllEndedByTimePeriod(dayStart, dayEnd);
         */
@@ -87,6 +88,20 @@ public class CalendarService implements CalendarServiceImpl {
         return (getIdsListByPersonByTime(attender, concreteTime).size() > 0);
     }
 
+    @Override
+    public List<Event> getEventsPersonInvolvedByTime(String attender, DateTime timeStart, DateTime timeEnd) {
+        List<UUID> idsAttendersEvents;
+        List<UUID> idsByTimeRangeEvents;
+
+        idsAttendersEvents = evStore.findEventsIdsByAttender(attender);
+        idsByTimeRangeEvents = evStore.findEventsIdsStartedOnTimeRange(timeStart, timeEnd);
+
+        idsAttendersEvents.retainAll(idsByTimeRangeEvents); // like inner join
+
+        return evStore.findEventsByIds(idsAttendersEvents);
+    }
+
+
     private List<UUID> getIdsListByPersonByTime(String attender, DateTime concreteTime) {
         List<UUID> idsEventsList;
         List<UUID> idsStartedBefore;
@@ -96,15 +111,15 @@ public class CalendarService implements CalendarServiceImpl {
         idsStartedBefore = evStore.findEventsIdsStartedBefore(concreteTime);
         idsEndedAfter = evStore.findEventsIdsEndedAfter(concreteTime);
 
-        idsEventsList.retainAll(idsStartedBefore); // the first left join
-        idsEventsList.retainAll(idsEndedAfter);    // the second left join
+        idsEventsList.retainAll(idsStartedBefore); // the first inner join
+        idsEventsList.retainAll(idsEndedAfter);    // the second inner join
 
         return idsEventsList;
     }
 
     public void printEvent(Event ev) {
         if (ev != null)
-            System.out.print(ev.toString());
+            System.out.println(ev.toString());
     }
 
 }
