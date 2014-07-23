@@ -7,7 +7,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +19,7 @@ public class EventTest {
         List<String> attenders = new ArrayList<String>();
         attenders.add("dfg@ddd.fg");
         attenders.add("sdfr@dfg.ty");
-        completeEvent = new Event.EvntBuilder()
+        completeEvent = new Event.EventBuilder()
                 .id(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"))
                 .title("eventTitle")
                 .description("eventDescription")
@@ -29,7 +28,7 @@ public class EventTest {
                 .timeEnd(new DateTime(2014, 4, 23, 22, 34))
                 .build();
 
-        emptyEvent = new Event.EvntBuilder()
+        emptyEvent = new Event.EventBuilder()
                 .id(null)
                 .title(null)
                 .description(null)

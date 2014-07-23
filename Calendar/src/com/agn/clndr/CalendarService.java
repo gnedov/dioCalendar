@@ -64,7 +64,7 @@ public class CalendarService implements CalendarServiceImpl {
     }
 
     public void printEvent(Event ev) {
-        System.out.print(ev.toString());
-        //[Andr] ToDo: optimize GregorianCalendar data for output
+        if (ev != null)
+            System.out.print(ev.toString());
     }
 }
