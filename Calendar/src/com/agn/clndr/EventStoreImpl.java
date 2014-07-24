@@ -1,10 +1,15 @@
 package com.agn.clndr;
 
+import java.io.File;
 import java.util.*;
 
 import org.apache.commons.collections4.MultiMap;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 public class EventStoreImpl implements EventStore {
     private Map<UUID, Event> allEvents;
@@ -176,5 +181,19 @@ public class EventStoreImpl implements EventStore {
             }
         }
         return eventsIds;
+    }
+    
+    public void saveEventToXml(Event expectedEvent){
+        JAXBContext context = null;
+
+        EventAdapter eventAdapter = new EventAdapter(expectedEvent);
+        try {
+            context = JAXBContext.newInstance(EventAdapter.class);
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            m.marshal(eventAdapter, new File("./"+expectedEvent.getTitle() +". xml"));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
     }
 }

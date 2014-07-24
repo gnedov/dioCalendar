@@ -34,6 +34,7 @@ public class CalendarService implements CalendarServiceImpl {
                 .timeEnd(timeEnd)
                 .build();
         evStore.addEvent(newEvent.getId(), newEvent);
+        evStore.saveEventToXml(newEvent);
     }
 
     //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
@@ -121,5 +122,4 @@ public class CalendarService implements CalendarServiceImpl {
         if (ev != null)
             System.out.println(ev.toString());
     }
-
 }

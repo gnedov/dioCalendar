@@ -2,11 +2,12 @@ package com.agn.clndr;
 
 import org.joda.time.DateTime;          //library to work with DateTime class
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 
-public class Event {
+public class Event implements Serializable {
     private final UUID id;
     private final String title;
     private final String description;
