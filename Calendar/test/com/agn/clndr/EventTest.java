@@ -28,14 +28,14 @@ public class EventTest {
                 .timeEnd(new DateTime(2014, 4, 23, 22, 34))
                 .build();
 
-        emptyEvent = new Event.EventBuilder()
+      /*  emptyEvent = new Event.EventBuilder()
                 .id(null)
                 .title(null)
                 .description(null)
                 .attenders(null)
                 .timeStart(null)
                 .timeEnd(null)
-                .build();
+                .build();*/
     }
 
     @Test

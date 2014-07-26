@@ -37,6 +37,8 @@ public class Event {
     }
 
     public List<String> getAttenders() {
+        //[Oleg] maybe we need to use this:
+        //[Oleg] return new ArrayList(attenders);
         return attenders;
     }
 

@@ -3,7 +3,7 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="calendarDataStore" class="com.agn.clndr.EventStoreImpl"/>
+    <bean id="calendarDataStore" class="com.agn.clndr.EventStorageImpl"/>
 
     <bean id="calendarService" class="com.agn.clndr.CalendarService">
         <constructor-arg ref="calendarDataStore"/>
