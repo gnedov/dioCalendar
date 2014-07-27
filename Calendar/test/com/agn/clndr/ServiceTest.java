@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static junit.framework.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class ServiceTest {
@@ -53,23 +54,23 @@ public class ServiceTest {
 
     @Test
     public void testAddEvent() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
-        doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
+        doNothing().when(evStore).addEvent(argThat(isEvent()));
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
 
         InOrder inOrder = inOrder(evStore);
 
         inOrder.verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
-        inOrder.verify(evStore).addEvent(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"), expectedEvent);
+        inOrder.verify(evStore).addEvent(expectedEvent);
         verifyNoMoreInteractions(evStore);
     }
 
     @Test
     public void testAddEvent_InterceptedCreation() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
-        doNothing().when(evStore).addEvent(argThat(isUUID()), argThat(isEvent()));
+        doNothing().when(evStore).addEvent( argThat(isEvent()));
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
         assertTrue(!service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d")));
     }
@@ -94,7 +95,7 @@ public class ServiceTest {
 
     @Test
     public void testCheckIdIsExists() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
         //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
         service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
@@ -103,23 +104,23 @@ public class ServiceTest {
 
     @Test
     public void testAddEvent_CheckCapturedParameters() throws Exception {
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
 
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
 
-        ArgumentCaptor<UUID> argUUID = ArgumentCaptor.forClass(UUID.class);
+     //!   ArgumentCaptor<UUID> argUUID = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
 
-        verify(evStore).addEvent(argUUID.capture(), argEvent.capture());
+        verify(evStore).addEvent( argEvent.capture());
 
-        assertEquals("38400000-8cf0-11bd-b23e-10b96e4ef00d", argUUID.getValue().toString());
+      //!  assertEquals("38400000-8cf0-11bd-b23e-10b96e4ef00d", argUUID.getValue().toString());
         assertEquals(expectedEvent, argEvent.getValue());
     }
     
     @Test
     public void testAddEvent_CallCheckIdIsExist() throws Exception{
-        EventStoreImpl evStore = new EventStoreImpl();
+        EventStorageImpl evStore = new EventStorageImpl();
         CalendarService service = new CalendarService(evStore);
         CalendarService spyService =spy(service);
         spyService.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
@@ -128,7 +129,7 @@ public class ServiceTest {
     
     @Test
     public void testGetEventById() throws Exception{
-        EventStoreImpl evStore = mock(EventStoreImpl.class);
+        EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarService service = new CalendarService(evStore);
         service.getEventById(id);
         verify(evStore).findById(id);

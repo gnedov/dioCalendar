@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.UUID;
 
 public class CalendarService implements CalendarServiceImpl {
-    private EventStoreImpl evStore;
+    private EventStorageImpl evStore;
 
-    public CalendarService(EventStoreImpl evStore) {
+    public CalendarService(EventStorageImpl evStore) {
         this.evStore = evStore;
     }
 
@@ -33,7 +33,7 @@ public class CalendarService implements CalendarServiceImpl {
                 .timeStart(timeStart)
                 .timeEnd(timeEnd)
                 .build();
-        evStore.addEvent(newEvent.getId(), newEvent);
+        evStore.addEvent(newEvent);
         evStore.saveEventToXml(newEvent);
     }
 
@@ -49,7 +49,7 @@ public class CalendarService implements CalendarServiceImpl {
 
     @Override
     public void deleteEvent(UUID eventId) {
-        evStore.removeEvent(eventId);
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
