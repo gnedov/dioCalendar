@@ -39,6 +39,7 @@ public class EventStorageImpl implements EventStorage {
         for (String attender:attenders){
             attenderMap.put(attender, uuid);
         }
+        saveEventToXml(event);
     }
 
     public boolean removeEvent(Event event) {

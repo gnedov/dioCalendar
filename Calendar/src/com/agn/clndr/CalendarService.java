@@ -34,7 +34,6 @@ public class CalendarService implements CalendarServiceImpl {
                 .timeEnd(timeEnd)
                 .build();
         evStore.addEvent(newEvent);
-        evStore.saveEventToXml(newEvent);
     }
 
     //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
@@ -75,11 +74,8 @@ public class CalendarService implements CalendarServiceImpl {
         List<Event> endedEvents = new ArrayList<>();
         DateTime dayStart = (timeDay.withTimeAtStartOfDay()).withZoneRetainFields(DateTimeZone.UTC);
         DateTime dayEnd = dayStart.plusSeconds(SECONDS_PER_DAY - 1);
-        /*  TODO: uncomment after findAllStartedByTimePeriod() and  findAllEndedByTimePeriod() appeared in eventStorage ;)
-        //[Andr]: uncomment lines below after merge with Oleg's branch will be done
-                         startedEvents = evStore.findAllStartedByTimePeriod(dayStart, dayEnd );
-                         endedEvents = evStore.findAllEndedByTimePeriod(dayStart, dayEnd);
-        */
+        startedEvents = (List<Event>) evStore.findAllStartedByTimePeriod(dayStart, dayEnd);
+        endedEvents = (List<Event>) evStore.findAllEndedByTimePeriod(dayStart, dayEnd);
         startedEvents.retainAll(endedEvents);
         return startedEvents;
     }

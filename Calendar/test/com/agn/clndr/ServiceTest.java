@@ -108,13 +108,9 @@ public class ServiceTest {
         CalendarService service = new CalendarService(evStore);
 
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
-
-     //!   ArgumentCaptor<UUID> argUUID = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
 
         verify(evStore).addEvent( argEvent.capture());
-
-      //!  assertEquals("38400000-8cf0-11bd-b23e-10b96e4ef00d", argUUID.getValue().toString());
         assertEquals(expectedEvent, argEvent.getValue());
     }
     
