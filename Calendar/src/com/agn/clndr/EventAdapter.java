@@ -1,6 +1,7 @@
 package com.agn.clndr;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
@@ -80,7 +81,8 @@ public class EventAdapter implements Serializable {
         this.timeEnd = endTime;
     }
 
-    @XmlElement(name = "attenders")
+    @XmlElementWrapper(name = "attenders")
+    @XmlElement(name = "attender")
     public List<String> getAttenders() {
         return attenders;
     }
