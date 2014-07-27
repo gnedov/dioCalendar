@@ -4,6 +4,10 @@ import java.util.*;
 
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
+import java.io.File;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 public class EventStorageImpl implements EventStorage {
     private HashMap<UUID, Event> allEvents;
@@ -35,6 +39,7 @@ public class EventStorageImpl implements EventStorage {
         for (String attender:attenders){
             attenderMap.put(attender, uuid);
         }
+        saveEventToXml(event);
     }
 
     public boolean removeEvent(Event event) {
@@ -133,5 +138,69 @@ public class EventStorageImpl implements EventStorage {
             }
         }
         return events;
+    }
+
+    public void saveEventToXml(Event expectedEvent){
+        JAXBContext context = null;
+
+        EventAdapter eventAdapter = new EventAdapter(expectedEvent);
+        try {
+            context = JAXBContext.newInstance(EventAdapter.class);
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            m.marshal(eventAdapter, new File("./"+expectedEvent.getTitle() +". xml"));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Event> findEventsByIds(List<UUID> ids) {
+        List<Event> eventList = new ArrayList<>();
+        for (UUID id : ids) {
+            eventList.add(allEvents.get(id));
+        }
+        return eventList;
+    }
+
+    public List<UUID> findEventsIdsStartedBefore(DateTime beforeDate) {
+        List<UUID> idsList = new ArrayList<>();
+        for (DateTime evDate : timeStartMap.keySet()) {
+            if (evDate.isBefore(beforeDate)) {
+                idsList.addAll((List<UUID>) timeStartMap.get(evDate));
+            }
+        }
+        return idsList;
+    }
+
+    public List<UUID> findEventsIdsEndedAfter(DateTime afterDate) {
+        List<UUID> idsList = new ArrayList<>();
+        for (DateTime evDate : timeEndMap.keySet()) {
+            if (evDate.isAfter(afterDate)) {
+                idsList.addAll((List<UUID>) timeEndMap.get(evDate));
+            }
+        }
+        return idsList;
+    }
+
+    public List<UUID> findEventsIdsStartedOnTimeRange(DateTime timeStart, DateTime timeEnd) {
+        List<UUID> idsList = new ArrayList<>();
+        for (DateTime startedTime : timeStartMap.keySet()) {
+            if (startedTime.isAfter(timeStart) && startedTime.isBefore(timeEnd)) {
+                idsList.addAll((List<UUID>) timeStartMap.get(startedTime));
+            }
+        }
+        return idsList;
+    }
+
+    public List<UUID> findEventsIdsByAttender(String attender) {
+        Iterator<Map.Entry<String, UUID>> iterator = attenderMap.iterator();
+        List<UUID> eventsIds = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, UUID> entry = iterator.next();
+            if (entry.getKey().equalsIgnoreCase(attender)) {
+                eventsIds.add(entry.getValue());
+            }
+        }
+        return eventsIds;
     }
 }

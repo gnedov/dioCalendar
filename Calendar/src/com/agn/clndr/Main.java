@@ -27,5 +27,18 @@ public class Main {
         id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
         service.createEvent(id, title, description, attenders, timeStart, timeEnd);
         service.printEvent(service.getEventById(id));
+
+        DateTime timeTEst = new DateTime(2014, 7, 23, 16, 22, 34);
+
+        service.getEventsOnWholeDay(timeTEst);
+
+        timeTEst = new DateTime(2014, 7, 2, 20, 59, 59);
+        if (service.isPersonBusyOnTime("eeeee@mail.ff", timeTEst))
+            System.out.println("Person <eeeee@mail.ff> is busy on " + timeTEst);
+
+
+        for (Event ev : service.getEventsPersonInvolvedByTime("eeeee@mail.ff", timeTEst.minusHours(10), timeTEst.plusHours(10))) {
+            service.printEvent(ev);
+        }
     }
 }

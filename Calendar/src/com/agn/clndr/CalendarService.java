@@ -2,6 +2,11 @@ package com.agn.clndr;
 
 import org.joda.time.DateTime;
 
+import static org.joda.time.DateTimeConstants.*;
+
+import org.joda.time.DateTimeZone;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,8 +68,54 @@ public class CalendarService implements CalendarServiceImpl {
         return null;
     }
 
+    @Override
+    public List<Event> getEventsOnWholeDay(DateTime timeDay) {
+        List<Event> startedEvents = new ArrayList<>();
+        List<Event> endedEvents = new ArrayList<>();
+        DateTime dayStart = (timeDay.withTimeAtStartOfDay()).withZoneRetainFields(DateTimeZone.UTC);
+        DateTime dayEnd = dayStart.plusSeconds(SECONDS_PER_DAY - 1);
+        startedEvents = (List<Event>) evStore.findAllStartedByTimePeriod(dayStart, dayEnd);
+        endedEvents = (List<Event>) evStore.findAllEndedByTimePeriod(dayStart, dayEnd);
+        startedEvents.retainAll(endedEvents);
+        return startedEvents;
+    }
+
+    @Override
+    public boolean isPersonBusyOnTime(String attender, DateTime concreteTime) {
+        return (getIdsListByPersonByTime(attender, concreteTime).size() > 0);
+    }
+
+    @Override
+    public List<Event> getEventsPersonInvolvedByTime(String attender, DateTime timeStart, DateTime timeEnd) {
+        List<UUID> idsAttendersEvents;
+        List<UUID> idsByTimeRangeEvents;
+
+        idsAttendersEvents = evStore.findEventsIdsByAttender(attender);
+        idsByTimeRangeEvents = evStore.findEventsIdsStartedOnTimeRange(timeStart, timeEnd);
+
+        idsAttendersEvents.retainAll(idsByTimeRangeEvents); // like inner join
+
+        return evStore.findEventsByIds(idsAttendersEvents);
+    }
+
+
+    private List<UUID> getIdsListByPersonByTime(String attender, DateTime concreteTime) {
+        List<UUID> idsEventsList;
+        List<UUID> idsStartedBefore;
+        List<UUID> idsEndedAfter;
+
+        idsEventsList = evStore.findEventsIdsByAttender(attender);
+        idsStartedBefore = evStore.findEventsIdsStartedBefore(concreteTime);
+        idsEndedAfter = evStore.findEventsIdsEndedAfter(concreteTime);
+
+        idsEventsList.retainAll(idsStartedBefore); // the first inner join
+        idsEventsList.retainAll(idsEndedAfter);    // the second inner join
+
+        return idsEventsList;
+    }
+
     public void printEvent(Event ev) {
         if (ev != null)
-            System.out.print(ev.toString());
+            System.out.println(ev.toString());
     }
 }
