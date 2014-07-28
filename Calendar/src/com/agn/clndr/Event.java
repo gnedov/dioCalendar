@@ -83,7 +83,6 @@ public class Event implements Serializable {
                 '}';
     }
 
-    //local code review (vtegza): be explicit in names @ 20.07.14
     public static class EventBuilder {
         private UUID id;
         private String title;
@@ -91,6 +90,18 @@ public class Event implements Serializable {
         private List<String> attenders;
         private DateTime timeStart;
         private DateTime timeEnd;
+
+        public EventBuilder() {
+        }
+
+        public EventBuilder(EventAdapter eventAdapter) {
+            this.id = UUID.fromString(eventAdapter.getId());
+            this.title = eventAdapter.getTitle();
+            this.description = eventAdapter.getDescription();
+            this.attenders = eventAdapter.getAttenders();
+            this.timeStart = DateTime.parse( eventAdapter.getStartTime());
+            this.timeEnd = DateTime.parse(eventAdapter.getEndTime());
+        }
 
         public EventBuilder id(UUID id) {
             if (id != null) {
