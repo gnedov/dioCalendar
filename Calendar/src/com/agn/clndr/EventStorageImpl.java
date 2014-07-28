@@ -1,9 +1,11 @@
 package com.agn.clndr;
 
+import java.nio.file.Path;
 import java.util.*;
 
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
+
 import java.io.File;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,12 +22,18 @@ public class EventStorageImpl implements EventStorage {
         this.allEvents = new HashMap<>();
         this.titleMap = new MultiValueMap<>();
         this.timeStartMap = new MultiValueMap<>();
-        this.timeEndMap=new MultiValueMap<>();
-        this.attenderMap=new MultiValueMap<>();
+        this.timeEndMap = new MultiValueMap<>();
+        this.attenderMap = new MultiValueMap<>();
+        loadEvents();
     }
 
     public void addEvent(Event event) {
-        if (event==null)
+        addEventToStorage(event);
+        saveEventToXml(event);
+    }
+
+    private void addEventToStorage(Event event) {
+        if (event == null)
             throw new IllegalArgumentException("Event cannot be null");
         UUID uuid = event.getId();
         if (uuid == null)
@@ -35,25 +43,24 @@ public class EventStorageImpl implements EventStorage {
         titleMap.put(event.getTitle(), uuid);
         timeStartMap.put(event.getTimeStart(), uuid);
         timeEndMap.put(event.getTimeEnd(), uuid);
-        List<String> attenders=event.getAttenders();
-        for (String attender:attenders){
+        List<String> attenders = event.getAttenders();
+        for (String attender : attenders) {
             attenderMap.put(attender, uuid);
         }
-        saveEventToXml(event);
     }
 
     public boolean removeEvent(Event event) {
-        if (event==null)
+        if (event == null)
             throw new IllegalArgumentException("Event cannot be null");
         UUID uuid = event.getId();
-        if (allEvents.remove(uuid)==null)
+        if (allEvents.remove(uuid) == null)
             return false;
         titleMap.removeMapping(event.getTitle(), uuid);
         timeStartMap.removeMapping(event.getTimeStart(), uuid);
 
-        List<String> attenders=event.getAttenders();
-        for (String attender:attenders){
-            attenderMap.removeMapping(attender,uuid);
+        List<String> attenders = event.getAttenders();
+        for (String attender : attenders) {
+            attenderMap.removeMapping(attender, uuid);
         }
         return true;
     }
@@ -64,7 +71,7 @@ public class EventStorageImpl implements EventStorage {
 
     //[Oleg] TODO Change getAllEvents: it must return Collection<Event>
     //[Oleg] TODO Maybe need return new HashMap(allEvents)
-    public Map getAllEvents() {
+    public Map<UUID, Event> getAllEvents() {
         return allEvents;
     }
 
@@ -85,7 +92,7 @@ public class EventStorageImpl implements EventStorage {
 
     //[Oleg] TODO\ Need check behavior, when allEvents collection contains a several elements,
     //[Oleg] TODO/ started at same time.
-    private Collection<Event> findAllByTimePeriod(DateTime start, DateTime end, MultiValueMap map) {
+    private Collection<Event> findAllByTimePeriod(DateTime start, DateTime end, MultiValueMap<DateTime, UUID> map) {
         Iterator<Map.Entry<DateTime, UUID>> iterator = map.iterator();
         Collection<Event> events = new ArrayList<>();
         while (iterator.hasNext()) {
@@ -98,7 +105,7 @@ public class EventStorageImpl implements EventStorage {
         return events;
     }
 
-    public Collection<Event> findAllStartedByTimePeriod(DateTime start, DateTime end ) {
+    public Collection<Event> findAllStartedByTimePeriod(DateTime start, DateTime end) {
         return findAllByTimePeriod(start, end, timeStartMap);
     }
 
@@ -108,47 +115,47 @@ public class EventStorageImpl implements EventStorage {
 
     //[Oleg] I return a collection, because a several events can start at same time
     public Collection<Event> findNextByDate(DateTime time) {
-        Set<DateTime> timeSet=timeStartMap.keySet();
-        DateTime good_key=null;
-        for(DateTime key:timeSet){
-            if (time.isBefore(key)){
-                if (good_key==null||time.isBefore(good_key)){
-                    good_key=key;
+        Set<DateTime> timeSet = timeStartMap.keySet();
+        DateTime good_key = null;
+        for (DateTime key : timeSet) {
+            if (time.isBefore(key)) {
+                if (good_key == null || time.isBefore(good_key)) {
+                    good_key = key;
                 }
             }
         }
-        if (good_key==null)
+        if (good_key == null)
             return new ArrayList<Event>(0);
-        Collection<UUID> uuidCollection=timeStartMap.getCollection(good_key);
-        Collection<Event> eventCollection=new ArrayList<Event>(uuidCollection.size());
-        for (UUID uuid:uuidCollection){
+        Collection<UUID> uuidCollection = timeStartMap.getCollection(good_key);
+        Collection<Event> eventCollection = new ArrayList<Event>(uuidCollection.size());
+        for (UUID uuid : uuidCollection) {
             eventCollection.add(allEvents.get(uuid));
         }
         return eventCollection;
     }
 
-    public Collection<Event> findAllByAttender(String attender){
+    public Collection<Event> findAllByAttender(String attender) {
         Iterator<Map.Entry<String, UUID>> iterator = attenderMap.iterator();
-        Collection<Event> events=new ArrayList<>();
-        while (iterator.hasNext()){
-            Map.Entry<String, UUID> entry=iterator.next();
-            if (entry.getKey().equalsIgnoreCase(attender)){
-                UUID id=entry.getValue();
+        Collection<Event> events = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, UUID> entry = iterator.next();
+            if (entry.getKey().equalsIgnoreCase(attender)) {
+                UUID id = entry.getValue();
                 events.add(allEvents.get(id));
             }
         }
         return events;
     }
 
-    public void saveEventToXml(Event expectedEvent){
-        JAXBContext context = null;
+    public void saveEventToXml(Event expectedEvent) {
+        JAXBContext context;
 
         EventAdapter eventAdapter = new EventAdapter(expectedEvent);
         try {
             context = JAXBContext.newInstance(EventAdapter.class);
             Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(eventAdapter, new File("./"+expectedEvent.getTitle() +". xml"));
+            m.marshal(eventAdapter, new File("./xmldata/" + expectedEvent.getTitle() + ".xml"));
         } catch (JAXBException e) {
             e.printStackTrace();
         }
@@ -202,5 +209,17 @@ public class EventStorageImpl implements EventStorage {
             }
         }
         return eventsIds;
+    }
+
+    private void loadEvents() {
+        DataHelper dataHelper = new DataHelper();
+        List<Event> eventList;
+        Path path = null;
+        eventList = dataHelper.getEventsByPath(path);
+
+        for (Event ev : eventList) {
+            addEventToStorage(ev);
+            System.out.println(ev.toString());
+        }
     }
 }
