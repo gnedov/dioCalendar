@@ -7,6 +7,9 @@ import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -215,11 +218,35 @@ public class EventStorageImpl implements EventStorage {
         DataHelper dataHelper = new DataHelper();
         List<Event> eventList;
         Path path = null;
+        LoadEventThread loadEventThread;
+
         eventList = dataHelper.getEventsByPath(path);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         for (Event ev : eventList) {
-            addEventToStorage(ev);
-            System.out.println(ev.toString());
+            loadEventThread = new LoadEventThread(ev);
+            executorService.submit(loadEventThread);
         }
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(1, TimeUnit.MINUTES);
+            System.out.println("Log: events were loaded.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class LoadEventThread implements Runnable {
+        private final Event event;
+
+        private LoadEventThread(Event event) {
+            this.event = event;
+        }
+
+        @Override
+        public void run() {
+            addEventToStorage(event);
+        }
+
     }
 }
