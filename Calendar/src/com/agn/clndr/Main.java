@@ -22,7 +22,7 @@ public class Main {
 
         // extend the application with Spring framework
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        CalendarService service = (CalendarService) context.getBean("calendarService");
+        CalendarServiceImpl service = (CalendarServiceImpl) context.getBean("calendarService");
 
         id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
         service.createEvent(id, title, description, attenders, timeStart, timeEnd);

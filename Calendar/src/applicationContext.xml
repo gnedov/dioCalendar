@@ -5,15 +5,15 @@
 
     <bean id="calendarDataStore" class="com.agn.clndr.EventStorageImpl"/>
 
-    <bean id="calendarService" class="com.agn.clndr.CalendarService">
+    <bean id="calendarService" class="com.agn.clndr.CalendarServiceImpl">
         <constructor-arg ref="calendarDataStore"/>
     </bean>
 
    <!-- <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
         <does not necessarily have to be the same name as the bean to be exported -->
-        <!--<property name="serviceName" value="CalendarService"/>-->
+        <!--<property name="serviceName" value="CalendarServiceImpl"/>-->
         <!--<property name="service" ref="calendarService"/>-->
-      <!--&lt;!&ndash;  <property name="serviceInterface" value="com.diosoft.sample.calendar.service.CalendarService"/>-->
+      <!--&lt;!&ndash;  <property name="serviceInterface" value="com.diosoft.sample.calendar.service.CalendarServiceImpl"/>-->
         <!--&lt;!&ndash; <defaults to 1099 &ndash;&gt;-->
         <!--<property name="registryPort" value="1199"/>-->
     <!--</beans>-->
