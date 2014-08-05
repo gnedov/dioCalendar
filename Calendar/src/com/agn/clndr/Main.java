@@ -39,6 +39,7 @@ public class Main {
 
         for (Event ev : service.getEventsPersonInvolvedByTime("eeeee@mail.ff", timeTEst.minusHours(10), timeTEst.plusHours(10))) {
             service.printEvent(ev);
+            service.updateEvent(ev);
         }
     }
 }

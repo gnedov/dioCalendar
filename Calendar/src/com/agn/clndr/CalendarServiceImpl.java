@@ -53,7 +53,17 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public void updateEvent(UUID eventId) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        this.updateEvent(getEventById(eventId));
+    }
+    
+    public void updateEvent(Event ev){
+        if (checkIdIsExists(ev.getId())){
+            deleteEvent(ev.getId());
+            Event newEvent = new Event.EventBuilder(ev)
+                    .build();
+
+            evStore.addEvent(newEvent);
+        }
     }
 
     @Override
