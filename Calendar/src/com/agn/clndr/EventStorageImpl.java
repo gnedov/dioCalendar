@@ -162,7 +162,7 @@ public class EventStorageImpl implements EventStorage {
             context = JAXBContext.newInstance(EventAdapter.class);
             Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(eventAdapter, new File("./xmldata/" + expectedEvent.getTitle() + ".xml"));
+            m.marshal(eventAdapter, new File("./xmldata/" + eventAdapter.getUniqueFileName() + ".xml"));
         } catch (JAXBException e) {
             e.printStackTrace();
         }

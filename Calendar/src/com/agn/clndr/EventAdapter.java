@@ -91,6 +91,10 @@ public class EventAdapter implements Serializable {
         this.attenders = attenders;
     }
 
+    public String getUniqueFileName(){
+        return this.title + "_(" + this.id + ")";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
