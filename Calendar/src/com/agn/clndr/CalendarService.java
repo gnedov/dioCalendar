@@ -10,7 +10,7 @@ public interface CalendarService {
     void createEvent(UUID id, String title, String description, List<String> attenders,
                      DateTime timeStart, DateTime timeEnd);
 
-    void deleteEvent(UUID eventId);
+    boolean deleteEvent(UUID eventId);
 
     void updateEvent(UUID eventId);
 

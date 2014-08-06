@@ -60,7 +60,7 @@ public class EventStorageImpl implements EventStorage {
             return false;
         titleMap.removeMapping(event.getTitle(), uuid);
         timeStartMap.removeMapping(event.getTimeStart(), uuid);
-
+        timeEndMap.removeMapping(event.getTimeEnd(), uuid);
         List<String> attenders = event.getAttenders();
         for (String attender : attenders) {
             attenderMap.removeMapping(attender, uuid);
@@ -80,6 +80,10 @@ public class EventStorageImpl implements EventStorage {
 
     public Event findById(UUID id) {
         return allEvents.get(id);
+    }
+    
+    public boolean isEventExist(UUID id){
+        return allEvents.containsKey(id);
     }
 
     public Collection<Event> findAllByTitle(String title) {
