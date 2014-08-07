@@ -81,8 +81,8 @@ public class EventStorageImpl implements EventStorage {
     public Event findById(UUID id) {
         return allEvents.get(id);
     }
-    
-    public boolean isEventExist(UUID id){
+
+    public boolean isEventExist(UUID id) {
         return allEvents.containsKey(id);
     }
 
@@ -162,7 +162,7 @@ public class EventStorageImpl implements EventStorage {
             context = JAXBContext.newInstance(EventAdapter.class);
             Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(eventAdapter, new File("./xmldata/" + eventAdapter.getUniqueFileName() + ".xml"));
+            m.marshal(eventAdapter, new File(DataHelper.APP_DATA_DIRECTORY, eventAdapter.getUniqueFileName() + ".xml"));
         } catch (JAXBException e) {
             e.printStackTrace();
         }
@@ -220,21 +220,23 @@ public class EventStorageImpl implements EventStorage {
 
     private void loadEvents() {
         DataHelper dataHelper = new DataHelper();
-        List<Event> eventList;
+        Map<Path, Event> eventPathMap;
         Path path = null;
         LoadEventThread loadEventThread;
 
-        eventList = dataHelper.getEventsByPath(path);
+        eventPathMap = dataHelper.getEventsByPath(path);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-        for (Event ev : eventList) {
+        for (Event ev : eventPathMap.values()) {
             loadEventThread = new LoadEventThread(ev);
             executorService.submit(loadEventThread);
         }
+
         executorService.shutdown();
+
         try {
             executorService.awaitTermination(1, TimeUnit.MINUTES);
-            System.out.println("Log: events were loaded.");
+            System.out.println("Log: <" + eventPathMap.size() + "> events were loaded.");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

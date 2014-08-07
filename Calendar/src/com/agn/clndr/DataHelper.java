@@ -1,18 +1,29 @@
 package com.agn.clndr;
 
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
+import java.util.Map;
 
 import static java.nio.file.FileVisitResult.*;
 
 public class DataHelper {
-    private static final String APP_DATA_DIRECTORY = "./xmldata";
+    public static final String APP_DATA_DIRECTORY = "./xmldata";
+    private static final String APP_TEMPLATES_DIRECTORY = "./xsd_templates";
+    private static final String EVENT_ADAPTER_XSD_TEMPLATE = "eventAdapterXSD.xsd";
     private static final String FILE_PATTERN = "*.xml";
 
     public static class Finder
@@ -77,10 +88,24 @@ public class DataHelper {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(EventAdapter.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+            SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = sf.newSchema(new File(APP_TEMPLATES_DIRECTORY, EVENT_ADAPTER_XSD_TEMPLATE));
+
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(path.toFile()));
+
             eventAdapter = (EventAdapter) jaxbUnmarshaller.unmarshal(path.toFile());
             System.out.println(eventAdapter);
         } catch (JAXBException e) {
-            System.out.print("Something wrong with unmarshalling: ");
+            System.out.println("Something wrong with unmarshalling: ");
+            e.printStackTrace();
+        } catch (SAXException e) {
+            System.out.println("SAXException: ");
+            System.out.println("file <" + path.getFileName() + "> is not valid.");
+            // e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("IOException: ");
             e.printStackTrace();
         }
         if (eventAdapter != null) {
@@ -89,8 +114,8 @@ public class DataHelper {
         return null;
     }
 
-    public List<Event> getEventsByPath(Path path) {
-        List<Event> eventList = new ArrayList<>();
+    public Map<Path, Event> getEventsByPath(Path path) {
+        Map<Path, Event> eventPathMap = new HashMap<>();
         List<Path> pathList;
         String pattern = FILE_PATTERN;
         Path startingDir;
@@ -100,16 +125,18 @@ public class DataHelper {
             startingDir = Paths.get(APP_DATA_DIRECTORY);
         }
         Finder finder = new Finder(pattern);
-        try{
-        Files.walkFileTree(startingDir, finder);
-        } catch (IOException e ){
+        try {
+            Files.walkFileTree(startingDir, finder);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         pathList = finder.done();
 
         for (Path p : pathList) {
-            eventList.add(getEventFromFile(p));
+            Event ev = getEventFromFile(p);
+            if (ev != null)
+                eventPathMap.put(p, ev);
         }
-        return eventList;
+        return eventPathMap;
     }
 }
