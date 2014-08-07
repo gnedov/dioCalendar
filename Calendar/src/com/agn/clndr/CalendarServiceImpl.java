@@ -23,7 +23,7 @@ public class CalendarServiceImpl implements CalendarService {
                             DateTime timeStart, DateTime timeEnd) {
 
         id = id != null ? id : UUID.randomUUID();
-        if (evStore.isEventExist(id)){
+        if (evStore.isEventExist(id)) {
             System.out.println("The event with UUID:" + id.toString() + " already exists! " +
                     "You can not add this event again!");
             return;  //Do nothing! the same event is already in store!
@@ -54,8 +54,8 @@ public class CalendarServiceImpl implements CalendarService {
         this.updateEvent(getEventById(eventId));
     }
 
-    public void updateEvent(Event ev){
-        if (evStore.isEventExist(ev.getId())){
+    public void updateEvent(Event ev) {
+        if (evStore.isEventExist(ev.getId())) {
             Event newEvent = new Event.EventBuilder(ev)
                     .build();
             deleteEvent(ev.getId());

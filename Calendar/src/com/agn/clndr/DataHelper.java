@@ -25,6 +25,7 @@ public class DataHelper {
     private static final String APP_TEMPLATES_DIRECTORY = "./xsd_templates";
     private static final String EVENT_ADAPTER_XSD_TEMPLATE = "eventAdapterXSD.xsd";
     private static final String FILE_PATTERN = "*.xml";
+    private Validator validator;
 
     public static class Finder
             extends SimpleFileVisitor<Path> {
@@ -83,29 +84,49 @@ public class DataHelper {
         }
     }
 
+    private void setupXMLValidator() {
+
+        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = null;
+        try {
+            schema = sf.newSchema(new File(APP_TEMPLATES_DIRECTORY, EVENT_ADAPTER_XSD_TEMPLATE));
+        } catch (SAXException e) {
+            System.out.println("SAXException: ");
+            System.out.println("schema file <" + EVENT_ADAPTER_XSD_TEMPLATE + "> is not valid.");
+            // e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        if (schema != null) {
+            validator = schema.newValidator();
+        }
+    }
+
+    private boolean validateXMLFile(Path p) {
+        boolean validateOK = false;
+        try {
+            validator.validate(new StreamSource(p.toFile()));
+            validateOK = true;
+        } catch (SAXException e) {
+            System.out.println("SAXException: ");
+            System.out.println("file <" + p.getFileName() + "> is not valid.");
+            // e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return validateOK;
+    }
+
     private Event getEventFromFile(Path path) {
         EventAdapter eventAdapter = null;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(EventAdapter.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = sf.newSchema(new File(APP_TEMPLATES_DIRECTORY, EVENT_ADAPTER_XSD_TEMPLATE));
-
-            Validator validator = schema.newValidator();
-            validator.validate(new StreamSource(path.toFile()));
-
             eventAdapter = (EventAdapter) jaxbUnmarshaller.unmarshal(path.toFile());
             System.out.println(eventAdapter);
         } catch (JAXBException e) {
             System.out.println("Something wrong with unmarshalling: ");
-            e.printStackTrace();
-        } catch (SAXException e) {
-            System.out.println("SAXException: ");
-            System.out.println("file <" + path.getFileName() + "> is not valid.");
-            // e.printStackTrace();
-        } catch (IOException e) {
-            System.out.println("IOException: ");
             e.printStackTrace();
         }
         if (eventAdapter != null) {
@@ -131,11 +152,16 @@ public class DataHelper {
             e.printStackTrace();
         }
         pathList = finder.done();
-
-        for (Path p : pathList) {
-            Event ev = getEventFromFile(p);
-            if (ev != null)
-                eventPathMap.put(p, ev);
+        if (pathList.size() > 0) {
+            setupXMLValidator();
+            for (Path p : pathList) {
+                Event ev = null;
+                if (validateXMLFile(p)) {
+                    ev = getEventFromFile(p);
+                }
+                if (ev != null)
+                    eventPathMap.put(p, ev);
+            }
         }
         return eventPathMap;
     }
