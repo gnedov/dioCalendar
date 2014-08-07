@@ -84,8 +84,20 @@ public class DataHelper {
         }
     }
 
-    private void setupXMLValidator() {
+    private List<Path> findPathsFromDir(Path currentDir, String pattern) {
+        List<Path> pathList = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentDir, pattern)) {
+            for (Path p : stream) {
+                pathList.add(p);
+            }
+        } catch (IOException e) {
+            System.out.print("IOException in findPathsFromDir()" + e.getMessage());
+        }
+        System.out.println("Matched: <" + pathList.size() + "> " + pattern + " files.");
+        return pathList;
+    }
 
+    private void setupXMLValidator() {
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = null;
         try {
@@ -93,7 +105,7 @@ public class DataHelper {
         } catch (SAXException e) {
             System.out.println("SAXException: ");
             System.out.println("schema file <" + EVENT_ADAPTER_XSD_TEMPLATE + "> is not valid.");
-            // e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            System.out.println(e.getMessage());
         }
 
         if (schema != null) {
@@ -109,11 +121,10 @@ public class DataHelper {
         } catch (SAXException e) {
             System.out.println("SAXException: ");
             System.out.println("file <" + p.getFileName() + "> is not valid.");
-            // e.printStackTrace();
+            System.out.println(e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return validateOK;
     }
 
@@ -145,13 +156,7 @@ public class DataHelper {
         if (path == null) {
             startingDir = Paths.get(APP_DATA_DIRECTORY);
         }
-        Finder finder = new Finder(pattern);
-        try {
-            Files.walkFileTree(startingDir, finder);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        pathList = finder.done();
+        pathList = findPathsFromDir(startingDir, pattern);
         if (pathList.size() > 0) {
             setupXMLValidator();
             for (Path p : pathList) {
@@ -164,5 +169,17 @@ public class DataHelper {
             }
         }
         return eventPathMap;
+    }
+
+    private List<Path> findPathsThrowTree(Path startingDir, String pattern) {
+        List<Path> pathList;
+        Finder finder = new Finder(pattern);
+        try {
+            Files.walkFileTree(startingDir, finder);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        pathList = finder.done();
+        return pathList;
     }
 }
