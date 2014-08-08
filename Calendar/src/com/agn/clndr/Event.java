@@ -99,8 +99,17 @@ public class Event implements Serializable {
             this.title = eventAdapter.getTitle();
             this.description = eventAdapter.getDescription();
             this.attenders = eventAdapter.getAttenders();
-            this.timeStart = DateTime.parse( eventAdapter.getStartTime());
+            this.timeStart = DateTime.parse(eventAdapter.getStartTime());
             this.timeEnd = DateTime.parse(eventAdapter.getEndTime());
+        }
+
+        public EventBuilder(Event event) {
+            this.id = event.getId();
+            this.title = event.getTitle();
+            this.description = event.getDescription();
+            this.attenders = event.getAttenders();
+            this.timeStart = event.getTimeStart();
+            this.timeEnd = event.getTimeEnd();
         }
 
         public EventBuilder id(UUID id) {

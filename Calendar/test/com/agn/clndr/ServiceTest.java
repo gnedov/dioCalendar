@@ -25,10 +25,11 @@ public class ServiceTest {
     private List<String> attenders;
     private DateTime timeStart;
     private DateTime timeEnd;
+    private final String strUUID = "38400000-8cf0-11bd-b23e-10b96e4ef011";
 
     @Before
     public void setUpEvent() {
-        this.id = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
+        this.id = UUID.fromString(strUUID);
         this.inputName = "dddd";
         this.description = "descr bnbnb kkfkf otoot";
         this.attenders = new ArrayList<>();
@@ -55,24 +56,26 @@ public class ServiceTest {
     @Test
     public void testAddEvent() throws Exception {
         EventStorageImpl evStore = mock(EventStorageImpl.class);
-        CalendarService service = new CalendarService(evStore);
+        CalendarServiceImpl service = new CalendarServiceImpl(evStore);
         doNothing().when(evStore).addEvent(argThat(isEvent()));
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
 
         InOrder inOrder = inOrder(evStore);
 
-        inOrder.verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
+        inOrder.verify(evStore).isEventExist(UUID.fromString(strUUID));
         inOrder.verify(evStore).addEvent(expectedEvent);
         verifyNoMoreInteractions(evStore);
+        service.deleteEvent(id);
     }
 
     @Test
     public void testAddEvent_InterceptedCreation() throws Exception {
         EventStorageImpl evStore = mock(EventStorageImpl.class);
-        CalendarService service = new CalendarService(evStore);
+        CalendarServiceImpl service = new CalendarServiceImpl(evStore);
         doNothing().when(evStore).addEvent( argThat(isEvent()));
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
-        assertTrue(!service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d")));
+        assertTrue(!service.checkIdIsExists(UUID.fromString(strUUID)));
+        service.deleteEvent(id);
     }
 
     private Matcher<UUID> isUUID() {
@@ -96,37 +99,45 @@ public class ServiceTest {
     @Test
     public void testCheckIdIsExists() throws Exception {
         EventStorageImpl evStore = mock(EventStorageImpl.class);
-        CalendarService service = new CalendarService(evStore);
+        CalendarServiceImpl service = new CalendarServiceImpl(evStore);
         //[Andr]: changed checkIdIsExists() method scope from <private> to <default_package> for testing only
-        service.checkIdIsExists(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
-        verify(evStore).findById(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
+        service.checkIdIsExists(UUID.fromString(strUUID));
+        verify(evStore).isEventExist(UUID.fromString(strUUID));
     }
 
     @Test
     public void testAddEvent_CheckCapturedParameters() throws Exception {
         EventStorageImpl evStore = mock(EventStorageImpl.class);
-        CalendarService service = new CalendarService(evStore);
+        CalendarServiceImpl service = new CalendarServiceImpl(evStore);
 
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
         ArgumentCaptor<Event> argEvent = ArgumentCaptor.forClass(Event.class);
 
         verify(evStore).addEvent( argEvent.capture());
         assertEquals(expectedEvent, argEvent.getValue());
+        service.deleteEvent(id);
     }
     
     @Test
-    public void testAddEvent_CallCheckIdIsExist() throws Exception{
+    public void testAddEvent_CallDeleteEvent() throws Exception{
         EventStorageImpl evStore = new EventStorageImpl();
-        CalendarService service = new CalendarService(evStore);
-        CalendarService spyService =spy(service);
+        CalendarServiceImpl service = new CalendarServiceImpl(evStore);
+        CalendarServiceImpl spyService =spy(service);
         spyService.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
-        verify(spyService).checkIdIsExists(id);
+        Event oldEvent = spyService.getEventById(id);
+        Event newEvent = new Event.EventBuilder(oldEvent)
+                .title("new title1")
+                .build();
+
+        spyService.updateEvent(newEvent);
+        verify(spyService).deleteEvent(id);
+        service.deleteEvent(id);
     }
     
     @Test
     public void testGetEventById() throws Exception{
         EventStorageImpl evStore = mock(EventStorageImpl.class);
-        CalendarService service = new CalendarService(evStore);
+        CalendarServiceImpl service = new CalendarServiceImpl(evStore);
         service.getEventById(id);
         verify(evStore).findById(id);
     }

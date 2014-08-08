@@ -1,12 +1,16 @@
 package com.agn.clndr;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -17,6 +21,7 @@ public class EventStorageImpl implements EventStorage {
     private MultiValueMap<DateTime, UUID> timeStartMap;
     private MultiValueMap<DateTime, UUID> timeEndMap;
     private MultiValueMap<String, UUID> attenderMap;
+    private Map<UUID, Path> pathMap;
 
     public EventStorageImpl() {
         this.allEvents = new HashMap<>();
@@ -24,15 +29,17 @@ public class EventStorageImpl implements EventStorage {
         this.timeStartMap = new MultiValueMap<>();
         this.timeEndMap = new MultiValueMap<>();
         this.attenderMap = new MultiValueMap<>();
+        this.pathMap = new HashMap<>();
         loadEvents();
     }
 
     public void addEvent(Event event) {
-        addEventToStorage(event);
-        saveEventToXml(event);
+        Path xmlPath;
+        xmlPath = saveEventToXml(event);
+        addEventToStorage(event, xmlPath);
     }
 
-    private void addEventToStorage(Event event) {
+    private void addEventToStorage(Event event, Path xmlPath) {
         if (event == null)
             throw new IllegalArgumentException("Event cannot be null");
         UUID uuid = event.getId();
@@ -47,9 +54,18 @@ public class EventStorageImpl implements EventStorage {
         for (String attender : attenders) {
             attenderMap.put(attender, uuid);
         }
+        pathMap.put(uuid, xmlPath);
     }
 
     public boolean removeEvent(Event event) {
+        DataHelper dh = new DataHelper();
+        if (dh.moveFileTo(pathMap.get(event.getId()), null)) {
+            return removeEventFromStorage(event);
+        }
+        return false;
+    }
+
+    private boolean removeEventFromStorage(Event event) {
         if (event == null)
             throw new IllegalArgumentException("Event cannot be null");
         UUID uuid = event.getId();
@@ -57,11 +73,12 @@ public class EventStorageImpl implements EventStorage {
             return false;
         titleMap.removeMapping(event.getTitle(), uuid);
         timeStartMap.removeMapping(event.getTimeStart(), uuid);
-
+        timeEndMap.removeMapping(event.getTimeEnd(), uuid);
         List<String> attenders = event.getAttenders();
         for (String attender : attenders) {
             attenderMap.removeMapping(attender, uuid);
         }
+        pathMap.remove(uuid);
         return true;
     }
 
@@ -77,6 +94,10 @@ public class EventStorageImpl implements EventStorage {
 
     public Event findById(UUID id) {
         return allEvents.get(id);
+    }
+
+    public boolean isEventExist(UUID id) {
+        return allEvents.containsKey(id);
     }
 
     public Collection<Event> findAllByTitle(String title) {
@@ -147,18 +168,21 @@ public class EventStorageImpl implements EventStorage {
         return events;
     }
 
-    public void saveEventToXml(Event expectedEvent) {
+    public Path saveEventToXml(Event expectedEvent) {
         JAXBContext context;
 
         EventAdapter eventAdapter = new EventAdapter(expectedEvent);
+        Path path = Paths.get(DataHelper.APP_DATA_DIRECTORY, eventAdapter.getUniqueFileName() + ".xml");
         try {
             context = JAXBContext.newInstance(EventAdapter.class);
             Marshaller m = context.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(eventAdapter, new File("./xmldata/" + expectedEvent.getTitle() + ".xml"));
+            m.marshal(eventAdapter, new File(path.toString()));
         } catch (JAXBException e) {
             e.printStackTrace();
+            return null;
         }
+        return path;
     }
 
     public List<Event> findEventsByIds(List<UUID> ids) {
@@ -213,13 +237,41 @@ public class EventStorageImpl implements EventStorage {
 
     private void loadEvents() {
         DataHelper dataHelper = new DataHelper();
-        List<Event> eventList;
+        Map<Path, Event> eventPathMap;
         Path path = null;
-        eventList = dataHelper.getEventsByPath(path);
+        LoadEventThread loadEventThread;
 
-        for (Event ev : eventList) {
-            addEventToStorage(ev);
-            System.out.println(ev.toString());
+        eventPathMap = dataHelper.getEventsByPath(path);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        for (Map.Entry<Path, Event> entry : eventPathMap.entrySet()) {
+            loadEventThread = new LoadEventThread(entry.getKey(), entry.getValue());
+            executorService.submit(loadEventThread);
         }
+
+        executorService.shutdown();
+
+        try {
+            executorService.awaitTermination(1, TimeUnit.MINUTES);
+            System.out.println("Log: <" + eventPathMap.size() + "> events were loaded.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class LoadEventThread implements Runnable {
+        private final Event event;
+        private final Path path;
+
+        private LoadEventThread(Path path, Event event) {
+            this.event = event;
+            this.path = path;
+        }
+
+        @Override
+        public void run() {
+            addEventToStorage(event, path);
+        }
+
     }
 }

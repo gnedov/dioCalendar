@@ -1,19 +1,32 @@
 package com.agn.clndr;
 
+import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
+import java.util.Map;
 
 import static java.nio.file.FileVisitResult.*;
 
 public class DataHelper {
-    private static final String APP_DATA_DIRECTORY = "./xmldata";
+    public static final String APP_DATA_DIRECTORY = "./xmldata";
+    private static final String APP_TEMPLATES_DIRECTORY = "./xsd_templates";
+    public static final String APP_DELETED_DATA_DIRECTORY = APP_DATA_DIRECTORY + "/deleted_xmldata/";
+    private static final String EVENT_ADAPTER_XSD_TEMPLATE = "eventAdapterXSD.xsd";
     private static final String FILE_PATTERN = "*.xml";
+    private Validator validator;
 
     public static class Finder
             extends SimpleFileVisitor<Path> {
@@ -72,15 +85,89 @@ public class DataHelper {
         }
     }
 
+    private List<Path> findPathsFromDir(Path currentDir, String pattern) {
+        List<Path> pathList = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentDir, pattern)) {
+            for (Path p : stream) {
+                pathList.add(p);
+            }
+        } catch (IOException e) {
+            System.out.print("IOException in findPathsFromDir()" + e.getMessage());
+        }
+        System.out.println("Matched: <" + pathList.size() + "> " + pattern + " files.");
+        return pathList;
+    }
+
+    public boolean moveFileTo(Path source, Path target) {
+        if (!Files.exists(source))
+            return true;
+
+        if (target == null)
+            target = Paths.get(APP_DELETED_DATA_DIRECTORY);
+
+        if (!Files.exists(target))
+            try {
+                Files.createDirectory(target);
+            } catch (IOException e) {
+                System.out.println("Something wrong with creating directory <" + target.toString() + ">.");
+                System.out.print(e.getMessage());
+                return false;
+            }
+
+        try {
+            target = Paths.get(target.toString(), source.getFileName().toString()); // set final file full pathname
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Log: moved");
+            System.out.println("from " + source.toString() + " to ->" + target.toString());
+            return true;
+        } catch (IOException e) {
+            System.out.println("Something wrong with moving file <" + source.toString() + ">.");
+            System.out.print(e.getMessage());
+        }
+        return false;
+    }
+
+    private void setupXMLValidator() {
+        SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = null;
+        try {
+            schema = sf.newSchema(new File(APP_TEMPLATES_DIRECTORY, EVENT_ADAPTER_XSD_TEMPLATE));
+        } catch (SAXException e) {
+            System.out.println("SAXException: ");
+            System.out.println("schema file <" + EVENT_ADAPTER_XSD_TEMPLATE + "> is not valid.");
+            System.out.println(e.getMessage());
+        }
+
+        if (schema != null) {
+            validator = schema.newValidator();
+        }
+    }
+
+    private boolean validateXMLFile(Path p) {
+        boolean validateOK = false;
+        try {
+            validator.validate(new StreamSource(p.toFile()));
+            validateOK = true;
+        } catch (SAXException e) {
+            System.out.println("SAXException: ");
+            System.out.println("file <" + p.getFileName() + "> is not valid.");
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return validateOK;
+    }
+
     private Event getEventFromFile(Path path) {
         EventAdapter eventAdapter = null;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(EventAdapter.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
             eventAdapter = (EventAdapter) jaxbUnmarshaller.unmarshal(path.toFile());
             System.out.println(eventAdapter);
         } catch (JAXBException e) {
-            System.out.print("Something wrong with unmarshalling: ");
+            System.out.println("Something wrong with unmarshalling: ");
             e.printStackTrace();
         }
         if (eventAdapter != null) {
@@ -89,8 +176,8 @@ public class DataHelper {
         return null;
     }
 
-    public List<Event> getEventsByPath(Path path) {
-        List<Event> eventList = new ArrayList<>();
+    public Map<Path, Event> getEventsByPath(Path path) {
+        Map<Path, Event> eventPathMap = new HashMap<>();
         List<Path> pathList;
         String pattern = FILE_PATTERN;
         Path startingDir;
@@ -99,17 +186,30 @@ public class DataHelper {
         if (path == null) {
             startingDir = Paths.get(APP_DATA_DIRECTORY);
         }
+        pathList = findPathsFromDir(startingDir, pattern);
+        if (pathList.size() > 0) {
+            setupXMLValidator();
+            for (Path p : pathList) {
+                Event ev = null;
+                if (validateXMLFile(p)) {
+                    ev = getEventFromFile(p);
+                }
+                if (ev != null)
+                    eventPathMap.put(p, ev);
+            }
+        }
+        return eventPathMap;
+    }
+
+    private List<Path> findPathsThrowTree(Path startingDir, String pattern) {
+        List<Path> pathList;
         Finder finder = new Finder(pattern);
-        try{
-        Files.walkFileTree(startingDir, finder);
-        } catch (IOException e ){
+        try {
+            Files.walkFileTree(startingDir, finder);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         pathList = finder.done();
-
-        for (Path p : pathList) {
-            eventList.add(getEventFromFile(p));
-        }
-        return eventList;
+        return pathList;
     }
 }

@@ -41,7 +41,7 @@ public class EventAdapter implements Serializable {
         return id;
     }
 
-    public void setId(String id){
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -89,6 +89,10 @@ public class EventAdapter implements Serializable {
 
     public void setAttenders(List<String> attenders) {
         this.attenders = attenders;
+    }
+
+    public String getUniqueFileName() {
+        return this.title + "_(" + this.id + ")";
     }
 
     @Override

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <eventAdapter>
     <attenders>
-        <attender>attOne@gmail.com</attender>
+        <attender>attTwo@gmail.com</attender>
         <attender>attThree@gmail.com</attender>
     </attenders>
-    <description>This is some temporary simple event</description>
+    <description>This is another simple event</description>
     <endDate>2014-08-16T23:05:10.000+03:00</endDate>
-    <eventId>aa2df0dc-af31-4653-9cca-547f1a9ec1de</eventId>
+    <eventId>ee7cd28a-bc87-47a1-88ab-1e83a8bfd518</eventId>
     <startDate>2014-08-16T00:00:00.000+03:00</startDate>
-    <event>Event temp</event>
+    <event>Event two</event>
 </eventAdapter>
