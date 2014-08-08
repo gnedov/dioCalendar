@@ -23,6 +23,7 @@ import static java.nio.file.FileVisitResult.*;
 public class DataHelper {
     public static final String APP_DATA_DIRECTORY = "./xmldata";
     private static final String APP_TEMPLATES_DIRECTORY = "./xsd_templates";
+    public static final String APP_DELETED_DATA_DIRECTORY = APP_DATA_DIRECTORY + "/deleted_xmldata/";
     private static final String EVENT_ADAPTER_XSD_TEMPLATE = "eventAdapterXSD.xsd";
     private static final String FILE_PATTERN = "*.xml";
     private Validator validator;
@@ -96,10 +97,34 @@ public class DataHelper {
         System.out.println("Matched: <" + pathList.size() + "> " + pattern + " files.");
         return pathList;
     }
-    
-    public boolean moveFileTo(Path path, Path destination){
 
-        return true;
+    public boolean moveFileTo(Path source, Path target) {
+        if (!Files.exists(source))
+            return true;
+
+        if (target == null)
+            target = Paths.get(APP_DELETED_DATA_DIRECTORY);
+
+        if (!Files.exists(target))
+            try {
+                Files.createDirectory(target);
+            } catch (IOException e) {
+                System.out.println("Something wrong with creating directory <" + target.toString() + ">.");
+                System.out.print(e.getMessage());
+                return false;
+            }
+
+        try {
+            target = Paths.get(target.toString(), source.getFileName().toString()); // set final file full pathname
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Log: moved");
+            System.out.println("from " + source.toString() + " to ->" + target.toString());
+            return true;
+        } catch (IOException e) {
+            System.out.println("Something wrong with moving file <" + source.toString() + ">.");
+            System.out.print(e.getMessage());
+        }
+        return false;
     }
 
     private void setupXMLValidator() {
