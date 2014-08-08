@@ -96,6 +96,11 @@ public class DataHelper {
         System.out.println("Matched: <" + pathList.size() + "> " + pattern + " files.");
         return pathList;
     }
+    
+    public boolean moveFileTo(Path path, Path destination){
+
+        return true;
+    }
 
     private void setupXMLValidator() {
         SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
