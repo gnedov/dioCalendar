@@ -1,19 +1,14 @@
 package com.agn.clndr;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
-import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 public class EventStorageImpl implements EventStorage {
     private HashMap<UUID, Event> allEvents;
@@ -35,7 +30,8 @@ public class EventStorageImpl implements EventStorage {
 
     public void addEvent(Event event) {
         Path xmlPath;
-        xmlPath = saveEventToXml(event);
+        DataHelper dh = new DataHelper();
+        xmlPath = dh.saveEventToXml(event);
         addEventToStorage(event, xmlPath);
     }
 
@@ -166,23 +162,6 @@ public class EventStorageImpl implements EventStorage {
             }
         }
         return events;
-    }
-
-    public Path saveEventToXml(Event expectedEvent) {
-        JAXBContext context;
-
-        EventAdapter eventAdapter = new EventAdapter(expectedEvent);
-        Path path = Paths.get(DataHelper.APP_DATA_DIRECTORY, eventAdapter.getUniqueFileName() + ".xml");
-        try {
-            context = JAXBContext.newInstance(EventAdapter.class);
-            Marshaller m = context.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.marshal(eventAdapter, new File(path.toString()));
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return path;
     }
 
     public List<Event> findEventsByIds(List<UUID> ids) {

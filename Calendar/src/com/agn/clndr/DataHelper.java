@@ -5,6 +5,7 @@ import org.xml.sax.SAXException;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -199,6 +200,23 @@ public class DataHelper {
             }
         }
         return eventPathMap;
+    }
+
+    public Path saveEventToXml(Event expectedEvent) {
+        JAXBContext context;
+
+        EventAdapter eventAdapter = new EventAdapter(expectedEvent);
+        Path path = Paths.get(DataHelper.APP_DATA_DIRECTORY, eventAdapter.getUniqueFileName() + ".xml");
+        try {
+            context = JAXBContext.newInstance(EventAdapter.class);
+            Marshaller m = context.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            m.marshal(eventAdapter, new File(path.toString()));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return path;
     }
 
     private List<Path> findPathsThrowTree(Path startingDir, String pattern) {
