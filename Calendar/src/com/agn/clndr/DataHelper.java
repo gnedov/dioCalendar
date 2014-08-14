@@ -100,6 +100,9 @@ public class DataHelper {
     }
 
     public boolean moveFileTo(Path source, Path target) {
+        if(source == null)
+            return true;
+
         if (!Files.exists(source))
             return true;
 

@@ -27,6 +27,8 @@ public class EventStorageImpl implements EventStorage {
     }
 
     public void addEvent(Event event) {
+        if (event == null)
+            throw new IllegalArgumentException("Event cannot be null");
         Path xmlPath;
         DataHelper dh = new DataHelper();
         xmlPath = dh.saveEventToXml(event);
@@ -34,8 +36,6 @@ public class EventStorageImpl implements EventStorage {
     }
 
     private void addEventToStorage(Event event, Path xmlPath) {
-        if (event == null)
-            throw new IllegalArgumentException("Event cannot be null");
         UUID uuid = event.getId();
         if (uuid == null)
             uuid = UUID.randomUUID();
@@ -52,6 +52,8 @@ public class EventStorageImpl implements EventStorage {
     }
 
     public boolean removeEvent(Event event) {
+        if (event == null)
+            throw new IllegalArgumentException("Event cannot be null");
         DataHelper dh = new DataHelper();
         if (dh.moveFileTo(pathMap.get(event.getId()), null)) {
             return removeEventFromStorage(event);
@@ -60,8 +62,7 @@ public class EventStorageImpl implements EventStorage {
     }
 
     private boolean removeEventFromStorage(Event event) {
-        if (event == null)
-            throw new IllegalArgumentException("Event cannot be null");
+
         UUID uuid = event.getId();
         if (allEvents.remove(uuid) == null)
             return false;
