@@ -2,7 +2,9 @@ package com.agn.clndr;
 
 import org.joda.time.DateTime;
 
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.UUID;
 
 interface EventStorage {
     void addEvent(Event event);
@@ -18,5 +20,8 @@ interface EventStorage {
     Collection<Event> findAllEndedByTimePeriod(DateTime start, DateTime end);
 
     Collection<Event> findNextByDate(DateTime time);
+    
+    boolean isEventExist(UUID id);
 
+    void addEventToStorage(Event event, Path xmlPath);
 }

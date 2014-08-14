@@ -6,7 +6,6 @@ import java.util.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
-import java.util.concurrent.*;
 
 public class EventStorageImpl implements EventStorage {
     private HashMap<UUID, Event> allEvents;
@@ -26,6 +25,7 @@ public class EventStorageImpl implements EventStorage {
         loadEvents();
     }
 
+    @Override
     public void addEvent(Event event) {
         if (event == null)
             throw new IllegalArgumentException("Event cannot be null");
@@ -35,7 +35,8 @@ public class EventStorageImpl implements EventStorage {
         addEventToStorage(event, xmlPath);
     }
 
-    private void addEventToStorage(Event event, Path xmlPath) {
+    @Override
+    public void addEventToStorage(Event event, Path xmlPath) {
         UUID uuid = event.getId();
         if (uuid == null)
             uuid = UUID.randomUUID();
@@ -51,6 +52,7 @@ public class EventStorageImpl implements EventStorage {
         pathMap.put(uuid, xmlPath);
     }
 
+    @Override
     public boolean removeEvent(Event event) {
         if (event == null)
             throw new IllegalArgumentException("Event cannot be null");
@@ -77,6 +79,7 @@ public class EventStorageImpl implements EventStorage {
         return true;
     }
 
+    @Override
     public int size() {
         return allEvents.size();
     }
@@ -91,10 +94,12 @@ public class EventStorageImpl implements EventStorage {
         return allEvents.get(id);
     }
 
+    @Override
     public boolean isEventExist(UUID id) {
         return allEvents.containsKey(id);
     }
 
+    @Override
     public Collection<Event> findAllByTitle(String title) {
         if (!titleMap.containsKey(title))
             return new ArrayList<>(0);
@@ -121,15 +126,18 @@ public class EventStorageImpl implements EventStorage {
         return events;
     }
 
+    @Override
     public Collection<Event> findAllStartedByTimePeriod(DateTime start, DateTime end) {
         return findAllByTimePeriod(start, end, timeStartMap);
     }
 
+    @Override
     public Collection<Event> findAllEndedByTimePeriod(DateTime start, DateTime end) {
         return findAllByTimePeriod(start, end, timeEndMap);
     }
 
     //[Oleg] I return a collection, because a several events can start at same time
+    @Override
     public Collection<Event> findNextByDate(DateTime time) {
         Set<DateTime> timeSet = timeStartMap.keySet();
         DateTime good_key = null;
@@ -141,9 +149,9 @@ public class EventStorageImpl implements EventStorage {
             }
         }
         if (good_key == null)
-            return new ArrayList<Event>(0);
+            return new ArrayList<>(0);
         Collection<UUID> uuidCollection = timeStartMap.getCollection(good_key);
-        Collection<Event> eventCollection = new ArrayList<Event>(uuidCollection.size());
+        Collection<Event> eventCollection = new ArrayList<>(uuidCollection.size());
         for (UUID uuid : uuidCollection) {
             eventCollection.add(allEvents.get(uuid));
         }
@@ -212,67 +220,11 @@ public class EventStorageImpl implements EventStorage {
         }
         return eventsIds;
     }
-
-    private void loadEvents() {
-        DataHelper dataHelper = new DataHelper();
-        Map<Path, Event> eventPathMap;
-        Path path = null;
-        LoadEventThread loadEventThread;
-
-        eventPathMap = dataHelper.getEventsByPath(path);
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        List<Future> futureList = new ArrayList<>();
-
-        for (Map.Entry<Path, Event> entry : eventPathMap.entrySet()) {
-            loadEventThread = new LoadEventThread(entry.getKey(), entry.getValue());
-            futureList.add(executorService.submit(loadEventThread));
-        }
-
-        executorService.shutdown();
-
-        try {
-            executorService.awaitTermination(1, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        checkLoadingResult(futureList);
-
-    }
-
-    private void checkLoadingResult(List<Future> futureList){
-        int eventCount = 0;
-        for (Future f : futureList) {
-            try {
-                boolean isEventAddedOK = (Boolean) f.get();
-                if(isEventAddedOK)
-                    eventCount++;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println("Log: <" + eventCount + "> events were loaded.");
-    }
     
-    private class LoadEventThread implements Callable<Boolean> {
-        private final Event event;
-        private final Path path;
+    private void loadEvents(){
+        EventsLoader evLoader = new EventsLoader(this);
 
-        private LoadEventThread(Path path, Event event) {
-            this.event = event;
-            this.path = path;
-        }
-
-        @Override
-        public Boolean call() {
-            if (!isEventExist(event.getId())) {
-                addEventToStorage(event, path);
-            } else
-                return Boolean.FALSE;
-
-            return Boolean.TRUE;
-        }
-
+        evLoader.loadEvents();
     }
+   
 }

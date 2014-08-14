@@ -222,7 +222,7 @@ public class DataHelper {
         return path;
     }
 
-    private List<Path> findPathsThrowTree(Path startingDir, String pattern) {
+    private List<Path> findPathsThroughTree(Path startingDir, String pattern) {
         List<Path> pathList;
         Finder finder = new Finder(pattern);
         try {
