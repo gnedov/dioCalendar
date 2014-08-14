@@ -6,9 +6,7 @@ import java.util.*;
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class EventStorageImpl implements EventStorage {
     private HashMap<UUID, Event> allEvents;
@@ -222,23 +220,41 @@ public class EventStorageImpl implements EventStorage {
 
         eventPathMap = dataHelper.getEventsByPath(path);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
+        List<Future> futureList = new ArrayList<>();
 
         for (Map.Entry<Path, Event> entry : eventPathMap.entrySet()) {
             loadEventThread = new LoadEventThread(entry.getKey(), entry.getValue());
-            executorService.submit(loadEventThread);
+            futureList.add(executorService.submit(loadEventThread));
         }
 
         executorService.shutdown();
 
         try {
             executorService.awaitTermination(1, TimeUnit.MINUTES);
-            System.out.println("Log: <" + eventPathMap.size() + "> events were loaded.");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        checkLoadingResult(futureList);
+
     }
 
-    private class LoadEventThread implements Runnable {
+    private void checkLoadingResult(List<Future> futureList){
+        int eventCount = 0;
+        for (Future f : futureList) {
+            try {
+                boolean isEventAddedOK = (Boolean) f.get();
+                if(isEventAddedOK)
+                    eventCount++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Log: <" + eventCount + "> events were loaded.");
+    }
+    
+    private class LoadEventThread implements Callable<Boolean> {
         private final Event event;
         private final Path path;
 
@@ -248,8 +264,13 @@ public class EventStorageImpl implements EventStorage {
         }
 
         @Override
-        public void run() {
-            addEventToStorage(event, path);
+        public Boolean call() {
+            if (!isEventExist(event.getId())) {
+                addEventToStorage(event, path);
+            } else
+                return Boolean.FALSE;
+
+            return Boolean.TRUE;
         }
 
     }
