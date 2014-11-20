@@ -1,6 +1,6 @@
 package com.agn.clndr;
 
-import org.joda.time.DateTime;          //library to work with DateTime class
+import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.List;

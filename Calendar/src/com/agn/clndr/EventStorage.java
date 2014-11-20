@@ -20,7 +20,7 @@ interface EventStorage {
     Collection<Event> findAllEndedByTimePeriod(DateTime start, DateTime end);
 
     Collection<Event> findNextByDate(DateTime time);
-    
+
     boolean isEventExist(UUID id);
 
     void addEventToStorage(Event event, Path xmlPath);

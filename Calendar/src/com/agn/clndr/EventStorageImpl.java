@@ -1,10 +1,10 @@
 package com.agn.clndr;
 
-import java.nio.file.Path;
-import java.util.*;
-
 import org.apache.commons.collections4.map.MultiValueMap;
 import org.joda.time.DateTime;
+
+import java.nio.file.Path;
+import java.util.*;
 
 
 public class EventStorageImpl implements EventStorage {
@@ -220,11 +220,11 @@ public class EventStorageImpl implements EventStorage {
         }
         return eventsIds;
     }
-    
-    private void loadEvents(){
+
+    private void loadEvents() {
         EventsLoader evLoader = new EventsLoader(this);
 
         evLoader.loadEvents();
     }
-   
+
 }

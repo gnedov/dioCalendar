@@ -2,19 +2,26 @@
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
+    <!-- server side section -->
     <bean id="calendarDataStore" class="com.agn.clndr.EventStorageImpl"/>
 
-    <bean id="calendarService" class="com.agn.clndr.CalendarServiceImpl">
+    <bean id="calendarServiceServer" class="com.agn.clndr.CalendarServiceImpl">
         <constructor-arg ref="calendarDataStore"/>
     </bean>
 
-   <!-- <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
-        <does not necessarily have to be the same name as the bean to be exported -->
-        <!--<property name="serviceName" value="CalendarServiceImpl"/>-->
-        <!--<property name="service" ref="calendarService"/>-->
-      <!--&lt;!&ndash;  <property name="serviceInterface" value="com.diosoft.sample.calendar.service.CalendarServiceImpl"/>-->
-        <!--&lt;!&ndash; <defaults to 1099 &ndash;&gt;-->
-        <!--<property name="registryPort" value="1199"/>-->
-    <!--</beans>-->
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <!--  <does not necessarily have to be the same name as the bean to be exported -->
+        <property name="serviceName" value="CalendarService"/>
+        <property name="service" ref="calendarServiceServer"/>
+        <property name="serviceInterface" value="com.agn.clndr.CalendarService"/>
+        <property name="registryPort" value="1199"/>
+       <!-- <property name="registryHost" value="localhost"/>-->
+    </bean>
+
+
+    <!-- client side section -->
+    <bean id="calendarService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:1199/CalendarService"/>
+        <property name="serviceInterface" value="com.agn.clndr.CalendarService"/>
+    </bean>
 </beans>

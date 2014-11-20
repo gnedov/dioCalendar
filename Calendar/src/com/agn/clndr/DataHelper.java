@@ -11,15 +11,16 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.*;
 import java.util.Map;
 
-import static java.nio.file.FileVisitResult.*;
+import static java.nio.file.FileVisitResult.CONTINUE;
 
 public class DataHelper {
     public static final String APP_DATA_DIRECTORY = "./xmldata";
@@ -100,7 +101,7 @@ public class DataHelper {
     }
 
     public boolean moveFileTo(Path source, Path target) {
-        if(source == null)
+        if (source == null)
             return true;
 
         if (!Files.exists(source))
@@ -209,7 +210,7 @@ public class DataHelper {
         JAXBContext context;
 
         EventAdapter eventAdapter = new EventAdapter(expectedEvent);
-        Path path = Paths.get(DataHelper.APP_DATA_DIRECTORY, eventAdapter.getUniqueFileName() + ".xml");
+        Path path = Paths.get(APP_DATA_DIRECTORY, eventAdapter.getUniqueFileName() + ".xml");
         try {
             context = JAXBContext.newInstance(EventAdapter.class);
             Marshaller m = context.createMarshaller();

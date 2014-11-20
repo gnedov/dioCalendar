@@ -1,14 +1,13 @@
 package com.agn.clndr;
 
 import org.joda.time.DateTime;
-
-import static org.joda.time.DateTimeConstants.*;
-
 import org.joda.time.DateTimeZone;
 
-import java.util.ArrayList;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.UUID;
+
+import static org.joda.time.DateTimeConstants.SECONDS_PER_DAY;
 
 public class CalendarServiceImpl implements CalendarService {
     private EventStorageImpl evStore;
@@ -20,7 +19,7 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     //local code review (vtegza): use CRUD, separated update from create method  @ 20.07.14
     public void createEvent(UUID id, String title, String description, List<String> attenders,
-                            DateTime timeStart, DateTime timeEnd) {
+                            DateTime timeStart, DateTime timeEnd) throws RemoteException {
 
         id = id != null ? id : UUID.randomUUID();
         if (evStore.isEventExist(id)) {
@@ -45,16 +44,16 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public boolean deleteEvent(UUID eventId) {
+    public boolean deleteEvent(UUID eventId) throws RemoteException {
         return (evStore.removeEvent(getEventById(eventId)));
     }
 
     @Override
-    public void updateEvent(UUID eventId) {
+    public void updateEvent(UUID eventId) throws RemoteException {
         this.updateEvent(getEventById(eventId));
     }
 
-    public void updateEvent(Event ev) {
+    public void updateEvent(Event ev) throws RemoteException {
         if (evStore.isEventExist(ev.getId())) {
             Event newEvent = new Event.EventBuilder(ev)
                     .build();
@@ -64,21 +63,21 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public Event getEventById(UUID eventId) {
+    public Event getEventById(UUID eventId) throws RemoteException {
         Event ev;
         ev = evStore.findById(eventId);
         return ev;
     }
 
     @Override
-    public Event getEventByTitle(String eventTitle) {
+    public Event getEventByTitle(String eventTitle) throws RemoteException {
         return null;
     }
 
     @Override
-    public List<Event> getEventsOnWholeDay(DateTime timeDay) {
-        List<Event> startedEvents = new ArrayList<>();
-        List<Event> endedEvents = new ArrayList<>();
+    public List<Event> getEventsOnWholeDay(DateTime timeDay) throws RemoteException {
+        List<Event> startedEvents;
+        List<Event> endedEvents;
         DateTime dayStart = (timeDay.withTimeAtStartOfDay()).withZoneRetainFields(DateTimeZone.UTC);
         DateTime dayEnd = dayStart.plusSeconds(SECONDS_PER_DAY - 1);
         startedEvents = (List<Event>) evStore.findAllStartedByTimePeriod(dayStart, dayEnd);
@@ -88,12 +87,12 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public boolean isPersonBusyOnTime(String attender, DateTime concreteTime) {
+    public boolean isPersonBusyOnTime(String attender, DateTime concreteTime) throws RemoteException {
         return (getIdsListByPersonByTime(attender, concreteTime).size() > 0);
     }
 
     @Override
-    public List<Event> getEventsPersonInvolvedByTime(String attender, DateTime timeStart, DateTime timeEnd) {
+    public List<Event> getEventsPersonInvolvedByTime(String attender, DateTime timeStart, DateTime timeEnd) throws RemoteException {
         List<UUID> idsAttendersEvents;
         List<UUID> idsByTimeRangeEvents;
 
