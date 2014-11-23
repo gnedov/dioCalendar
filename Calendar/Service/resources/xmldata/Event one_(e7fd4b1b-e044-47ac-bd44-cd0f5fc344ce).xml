@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<eventAdapter>
+    <attenders>
+        <attender>attTwo@gmail.com</attender>
+        <attender>attOne@gmail.com</attender>
+    </attenders>
+    <description>This is simple event</description>
+    <endDate>2014-09-20T13:11:10.000+03:00</endDate>
+    <eventId>e7fd4b1b-e044-47ac-bd44-cd0f5fc344ce</eventId>
+    <startDate>2014-09-20T12:11:00.000+03:00</startDate>
+    <event>Event one</event>
+</eventAdapter>
