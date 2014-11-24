@@ -1,17 +1,15 @@
 package com.agn.clndr.client;
 
-import com.agn.clndr.service.CalendarService;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import java.rmi.RemoteException;
+import com.agn.clndrclient.CalendarClient;
+import com.agn.cmdparser.ConsoleInput;
 
 public class MainClient {
     public static void main(String[] args) {
-        ApplicationContext context = new ClassPathXmlApplicationContext("ClientApplicationContext.xml");
-        CalendarService service = (CalendarService) context.getBean("calendarService");
 
-        System.out.println("client started!");
+        CalendarClient calendarClient = new CalendarClientImpl();
+        ConsoleInput consoleInput = new ConsoleInput(calendarClient);
+
+        consoleInput.startConsole(args);
 
     }
 
