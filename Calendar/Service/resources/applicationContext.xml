@@ -3,7 +3,9 @@
        xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     <!-- server side section -->
-    <bean id="calendarDataStore" class="com.agn.clndr.service.EventStorageImpl"/>
+    <bean id="calendarDataStore" class="com.agn.clndr.service.EventStorageImpl">
+         <constructor-arg type="boolean" value="true"/>
+    </bean>
 
     <bean id="calendarServiceServer" class="com.agn.clndr.service.CalendarServiceImpl">
         <constructor-arg ref="calendarDataStore"/>
@@ -15,6 +17,6 @@
         <property name="service" ref="calendarServiceServer"/>
         <property name="serviceInterface" value="com.agn.clndr.service.CalendarService"/>
         <property name="registryPort" value="1199"/>
-       <!-- <property name="registryHost" value="localhost"/>-->
+        <!-- <property name="registryHost" value="localhost"/>-->
     </bean>
 </beans>

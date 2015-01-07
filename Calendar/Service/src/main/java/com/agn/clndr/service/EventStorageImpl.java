@@ -15,6 +15,12 @@ public class EventStorageImpl implements EventStorage {
     private MultiValueMap<String, UUID> attenderMap;
     private Map<UUID, Path> pathMap;
 
+    public EventStorageImpl(boolean fillStorage) {
+        this();
+        if (fillStorage)
+            loadEvents();
+    }
+
     public EventStorageImpl() {
         this.allEvents = new HashMap<>();
         this.titleMap = new MultiValueMap<>();
@@ -22,7 +28,6 @@ public class EventStorageImpl implements EventStorage {
         this.timeEndMap = new MultiValueMap<>();
         this.attenderMap = new MultiValueMap<>();
         this.pathMap = new HashMap<>();
-        loadEvents();
     }
 
     @Override
@@ -95,7 +100,7 @@ public class EventStorageImpl implements EventStorage {
     }
 
     @Override
-    public boolean isEventExist(UUID id) {
+    public boolean isEventExist(UUID id) throws NullPointerException{
         return allEvents.containsKey(id);
     }
 
