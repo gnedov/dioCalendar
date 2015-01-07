@@ -5,6 +5,7 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 
 import java.rmi.RemoteException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,12 +98,12 @@ public class CalendarServiceImpl implements CalendarService {
         List<UUID> idsAttendersEvents;
         List<UUID> idsByTimeRangeEvents;
 
-        idsAttendersEvents = evStore.findEventsIdsByAttender(attender);
-        idsByTimeRangeEvents = evStore.findEventsIdsStartedOnTimeRange(timeStart, timeEnd);
+        idsAttendersEvents =(List<UUID>) evStore.findEventsIdsByAttender(attender);
+        idsByTimeRangeEvents =(List<UUID>) evStore.findEventsIdsStartedOnTimeRange(timeStart, timeEnd);
 
         idsAttendersEvents.retainAll(idsByTimeRangeEvents); // like inner join
 
-        return evStore.findEventsByIds(idsAttendersEvents);
+        return (List<Event>) evStore.findEventsByIds(idsAttendersEvents);
     }
 
 
@@ -111,9 +112,9 @@ public class CalendarServiceImpl implements CalendarService {
         List<UUID> idsStartedBefore;
         List<UUID> idsEndedAfter;
 
-        idsEventsList = evStore.findEventsIdsByAttender(attender);
-        idsStartedBefore = evStore.findEventsIdsStartedBefore(concreteTime);
-        idsEndedAfter = evStore.findEventsIdsEndedAfter(concreteTime);
+        idsEventsList = (List<UUID>) evStore.findEventsIdsByAttender(attender);
+        idsStartedBefore = (List<UUID>) evStore.findEventsIdsStartedBefore(concreteTime);
+        idsEndedAfter = (List<UUID>) evStore.findEventsIdsEndedAfter(concreteTime);
 
         idsEventsList.retainAll(idsStartedBefore); // the first inner join
         idsEventsList.retainAll(idsEndedAfter);    // the second inner join
