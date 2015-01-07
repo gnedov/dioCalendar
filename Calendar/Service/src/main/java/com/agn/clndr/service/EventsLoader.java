@@ -63,9 +63,9 @@ public class EventsLoader {
 
         @Override
         public Boolean call() {
-            if (!eventStorage.isEventExist(event.getId())) {
+            if (!(eventStorage.isEventExist(event.getId())))
                 eventStorage.addEventToStorage(event, path);
-            } else
+             else
                 return Boolean.FALSE;
 
             return Boolean.TRUE;
