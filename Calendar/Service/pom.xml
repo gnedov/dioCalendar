@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>Service</groupId>
+    <groupId>com.agn.clndr.service</groupId>
     <artifactId>CalendarService</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
@@ -59,6 +59,26 @@
                     <target>1.7</target>
                     <encoding>utf-8</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>CalendarServiceInterface</classifier>
+                            <includes>
+                                <include>**/service/CalendarService.class</include>
+                                <include>**/service/Event.class</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
