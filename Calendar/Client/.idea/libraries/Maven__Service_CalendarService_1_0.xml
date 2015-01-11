@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Maven: Service:CalendarService:1.0">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/Service/CalendarService/1.0/CalendarService-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../Service/target/CalendarService-1.0.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$MAVEN_REPOSITORY$/Service/CalendarService/1.0/CalendarService-1.0-javadoc.jar!/" />
