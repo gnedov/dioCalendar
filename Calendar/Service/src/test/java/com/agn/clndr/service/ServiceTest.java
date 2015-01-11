@@ -54,7 +54,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void testAddEvent() throws Exception {
+    public void testAddEvent_InOrder() throws Exception {
         EventStorageImpl evStore = mock(EventStorageImpl.class);
         CalendarServiceImpl service = new CalendarServiceImpl(evStore);
         doNothing().when(evStore).addEvent(argThat(isEvent()));
@@ -65,7 +65,6 @@ public class ServiceTest {
         inOrder.verify(evStore).isEventExist(UUID.fromString(strUUID));
         inOrder.verify(evStore).addEvent(expectedEvent);
         verifyNoMoreInteractions(evStore);
-        service.deleteEvent(id);
     }
 
     @Test
@@ -75,7 +74,6 @@ public class ServiceTest {
         doNothing().when(evStore).addEvent( argThat(isEvent()));
         service.createEvent(id, inputName, description, attenders, timeStart, timeEnd);
         assertTrue(!service.checkIdIsExists(UUID.fromString(strUUID)));
-        service.deleteEvent(id);
     }
 
     private Matcher<UUID> isUUID() {
