@@ -57,10 +57,10 @@
             <MaxFileSize>10MB</MaxFileSize>
         </triggeringPolicy>
     </appender>
-    <logger name="com.agn.validator" level="DEBUG">
+    <logger name="com.agn.argparser.validator" level="DEBUG">
         <appender-ref ref="validator"/>
     </logger>
-    <logger name="com.agn.cmdparser" level="DEBUG">
+    <logger name="com.agn.argparser.cmd" level="DEBUG">
         <appender-ref ref="parser"/>
     </logger>
     <logger name="com.agn.clndr.client" level="DEBUG">

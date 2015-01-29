@@ -1,7 +1,7 @@
 package com.agn.clndr.client;
 
 import com.agn.clndr.service.CalendarService;
-import com.agn.clndrclient.CalendarClient;
+import com.agn.argparser.clndrclient.CalendarClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

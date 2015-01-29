@@ -71,6 +71,11 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>./Service/resources</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

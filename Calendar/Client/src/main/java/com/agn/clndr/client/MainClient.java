@@ -1,7 +1,7 @@
 package com.agn.clndr.client;
 
-import com.agn.clndrclient.CalendarClient;
-import com.agn.cmdparser.ConsoleInput;
+import com.agn.argparser.clndrclient.CalendarClient;
+import com.agn.argparser.cmd.ConsoleInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
